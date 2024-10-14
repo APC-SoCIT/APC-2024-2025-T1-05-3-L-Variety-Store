@@ -8,3 +8,5 @@
 ● Anamika Nepomuceno https://github.com/annanepomuceno
 
 ● Rainier Edward Lopez https://github.com/rainieredward
+
+FRAPPE_HEXTECH: https://github.com/apctimperez/frappe_hextech.git
