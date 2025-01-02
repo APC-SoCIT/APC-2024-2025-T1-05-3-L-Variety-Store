@@ -7,7 +7,16 @@
     <title>Home</title>
 </head>
 <body>
-    <h1>Welcome to the Home Page!</h1>
+    <header>
+        <h1>Welcome to 3L variety store and frozen goods</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#online-order">Online Order</a></li>
+            </ul>
+        </nav>
+    </header>
 
     {% if user.is_authenticated %}
         <p>Welcome, {{ user.username }}!</p>
