@@ -1,3 +1,4 @@
+import time
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
@@ -30,7 +31,8 @@ def register_view(request):
         if form.is_valid():
             form.save()  # Saves the user and assigns them to the 'Customer' group
             messages.success(request, 'Your account has been created successfully.')
-            return redirect('login')  # Redirect to the login page
+            time.sleep(3)
+            return redirect('accounts:login')  # Redirect to the login page
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
