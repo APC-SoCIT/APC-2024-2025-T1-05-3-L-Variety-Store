@@ -133,3 +133,6 @@ LOGIN_REDIRECT_URL = '/'  # Default home page after login
 
 # Redirect after logout
 LOGOUT_REDIRECT_URL = '/'  # Default home page after logout
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+

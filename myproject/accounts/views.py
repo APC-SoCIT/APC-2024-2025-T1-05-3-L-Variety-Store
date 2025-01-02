@@ -1,7 +1,8 @@
-# accounts/views.py
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
+from .forms import UserCreationFormWithRole  # Import from your own forms.py
 
 def login_view(request):
     if request.method == 'POST':
@@ -22,3 +23,17 @@ def logout_view(request):
 
 def home(request):
     return render(request, 'home.html')
+
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationFormWithRole(request.POST)
+        if form.is_valid():
+            form.save()  # Saves the user and assigns them to the 'Customer' group
+            messages.success(request, 'Your account has been created successfully.')
+            return redirect('login')  # Redirect to the login page
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = UserCreationFormWithRole()
+
+    return render(request, 'accounts/register.html', {'form': form})
