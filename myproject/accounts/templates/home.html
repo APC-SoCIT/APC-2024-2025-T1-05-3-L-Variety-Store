@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+{% if user.is_authenticated %}
+    <meta http-equiv="refresh" content="0; url=/home.html">
+{% else %}
+    <meta http-equiv="refresh" content="0; url=/login.html">
+{% endif %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
