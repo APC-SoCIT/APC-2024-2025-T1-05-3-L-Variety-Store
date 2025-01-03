@@ -1,28 +1,34 @@
-<!-- templates/home.html -->
 <!DOCTYPE html>
+{% if user.is_authenticated %}
+    <meta http-equiv="refresh" content="0; url=/home.html">
+{% else %}
+    <meta http-equiv="refresh" content="0; url=/login.html">
+{% endif %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>3-L Variety Store</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>Welcome to 3L variety store and frozen goods</h1>
-        <nav>
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#products">Products</a></li>
-                <li><a href="#online-order">Online Order</a></li>
-            </ul>
-        </nav>
+        <div class="navbar">
+            <h1>3-L Variety Store and Frozen Goods</h1>
+            <nav>
+                <ul>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#order-online">Order Online</a></li>
+                    <li><a href="#reservation">Reservation</a></li>
+                    <li><a href="#logout">Log out</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
-
-    {% if user.is_authenticated %}
-        <p>Welcome, {{ user.username }}!</p>
-        <a href="{% url 'accounts:logout' %}">Logout</a>
-    {% else %}
-        <p><a href="{% url 'accounts:login' %}">Login</a></p>
-    {% endif %}
+    <main>
+        <h2>WELCOME USER</h2>
+        <p>are you ready to order?</p>
+        <a href="#order" class="order-button">ORDER NOW</a>
+    </main>
 </body>
 </html>
