@@ -1,0 +1,47 @@
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Product
+import json
+
+@csrf_exempt
+def scan_barcode(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        barcodes = data.get('barcodes', [])  # Accepting multiple barcodes
+
+        if not barcodes:
+            return JsonResponse({"success": False, "message": "No barcodes provided."})
+
+        scanned_products = []
+        errors = []
+        
+        for barcode in barcodes:
+            product = Product.objects.filter(barcode=barcode).first()
+
+            if not product:
+                errors.append(f"Product with barcode {barcode} not found.")
+                continue
+
+            if product.quantity <= 0:
+                errors.append(f"Product '{product.name}' (barcode: {barcode}) is out of stock.")
+                continue
+
+            # Deduct 1 item per scan
+            product.quantity -= 1
+            product.save()
+
+            scanned_products.append({
+                "name": product.name,
+                "barcode": product.barcode,
+                "remaining_quantity": product.quantity,
+                "price": float(product.price),
+            })
+
+        response_data = {
+            "success": True if scanned_products else False,
+            "scanned_products": scanned_products,
+            "errors": errors
+        }
+        return JsonResponse(response_data)
+    else:
+        return JsonResponse({"success": False, "message": "Invalid request method."})

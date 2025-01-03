@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS System</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Point of Sale (POS)</h1>
+        <div class="input-group">
+            <input type="text" id="barcodeInput" placeholder="Scan or enter barcodes (comma-separated)">
+            <button id="addButton">Add to Cart</button>
+        </div>
+        <ul id="cart">
+            <li>No products in cart</li>
+        </ul>
+        <div class="summary">
+            <p id="total">Total: ₱0.00</p>
+            <button id="generateInvoice">Generate Invoice</button>
+        </div>
+    </div>
+</body>
+</html>
