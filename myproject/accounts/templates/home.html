@@ -38,7 +38,7 @@
                     <li><a href="#products">Products</a></li>
                     <li><a href="#order-online">Order Online</a></li>
                     <li><a href="#reservation">Reservation</a></li>
-                    <li><a href="#login">Login</a></li>
+                    <li><a href="{% url 'accounts:login' %}">Login</a></li>
                 </ul>
             </nav>
         </div>
@@ -49,7 +49,6 @@
         <a href="#order" class="order-button">ORDER NOW</a>
     </main>
     
-    <meta http-equiv="refresh" content="0; url=/login.html">
 {% endif %}
 </body>
 </html>
