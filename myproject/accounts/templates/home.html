@@ -1,10 +1,5 @@
 <!DOCTYPE html>
-{% if user.is_authenticated %}
-    <meta http-equiv="refresh" content="0; url=/home.html">
-{% else %}
-    <meta http-equiv="refresh" content="0; url=/login.html">
-{% endif %}
-<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +7,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <html lang="en">
+    {% if user.is_authenticated %}
     <header>
         <div class="navbar">
             <h1>3-L Variety Store and Frozen Goods</h1>
@@ -20,7 +17,7 @@
                     <li><a href="#products">Products</a></li>
                     <li><a href="#order-online">Order Online</a></li>
                     <li><a href="#reservation">Reservation</a></li>
-                    <li><a href="#logout">Log out</a></li>
+                    <li><a href="{% url 'accounts:logout' %}">Logout</a></li>
                 </ul>
             </nav>
         </div>
@@ -30,5 +27,29 @@
         <p>are you ready to order?</p>
         <a href="#order" class="order-button">ORDER NOW</a>
     </main>
+
+    {% else %}
+
+    <header>
+        <div class="navbar">
+            <h1>3-L Variety Store and Frozen Goods</h1>
+            <nav>
+                <ul>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#order-online">Order Online</a></li>
+                    <li><a href="#reservation">Reservation</a></li>
+                    <li><a href="#login">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <h2>You need to sign in</h2>
+        <p>are you ready to order?</p>
+        <a href="#order" class="order-button">ORDER NOW</a>
+    </main>
+    
+    <meta http-equiv="refresh" content="0; url=/login.html">
+{% endif %}
 </body>
 </html>
