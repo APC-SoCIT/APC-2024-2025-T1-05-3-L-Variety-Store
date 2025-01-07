@@ -14,7 +14,7 @@ class UserCreationFormWithRole(UserCreationForm):
             user.save()  # Save the user to the database
         
         # Assign the new user to the 'Customer' group
-        customer_group = Group.objects.get(name='Customer')
+        customer_group = Group.objects.get(name='Customers')
         user.groups.add(customer_group)
         
         return user
