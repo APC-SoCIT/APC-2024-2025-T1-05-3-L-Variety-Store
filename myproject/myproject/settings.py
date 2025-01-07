@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'pos_front',
     'accounts',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -136,3 +137,4 @@ LOGOUT_REDIRECT_URL = '/'  # Default home page after logout
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+STATIC_URL = '/static/'
