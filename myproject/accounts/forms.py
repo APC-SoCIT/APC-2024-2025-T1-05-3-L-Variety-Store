@@ -1,8 +1,8 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
 from django import forms
+from .models import Role
 
-# This is the custom form that extends Django's UserCreationForm
 class UserCreationFormWithRole(UserCreationForm):
     class Meta:
         model = User
@@ -13,8 +13,8 @@ class UserCreationFormWithRole(UserCreationForm):
         if commit:
             user.save()  # Save the user to the database
         
-        # Assign the new user to the 'Customer' group
-        customer_group = Group.objects.get(name='Customers')
+        # Automatically assign the user to the 'Customers' group
+        customer_group = Group.objects.get(name='Customers')  # Ensure 'Customers' group exists
         user.groups.add(customer_group)
         
         return user
