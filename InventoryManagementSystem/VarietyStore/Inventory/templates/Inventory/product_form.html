@@ -1,6 +1,178 @@
-<h1>{% if form.instance.pk %}Edit Product{% else %}Create New Product{% endif %}</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2em;
+            color: #333;
+        }
+
+        .form-container {
+            width: 50%;
+            margin: 30px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 1.1em;
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #45a049;
+        }
+
+        .form-group .cancel-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #f44336;
+            color: white;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .form-group .cancel-btn:hover {
+            background-color: #e53935;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .form-footer a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .barcode-image {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Edit Product</h1>
+
+<div class="form-container">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="ProjectName">Project Name</label>
+            <input type="text" id="ProjectName" name="ProjectName" value="{{ product.ProjectName }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="ProductQuantity">Quantity</label>
+            <input type="number" id="ProductQuantity" name="ProductQuantity" value="{{ product.ProductQuantity }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="ProductPrice">Price</label>
+            <input type="number" step="0.01" id="ProductPrice" name="ProductPrice" value="{{ product.ProductPrice }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="ProductType">Product Type</label>
+            <select id="ProductType" name="ProductType" required>
+                <option value="Type 1" {% if product.ProductType == "Type 1" %}selected{% endif %}>Type 1</option>
+                <option value="Type 2" {% if product.ProductType == "Type 2" %}selected{% endif %}>Type 2</option>
+                <option value="Type 3" {% if product.ProductType == "Type 3" %}selected{% endif %}>Type 3</option>
+                <option value="Type 4" {% if product.ProductType == "Type 4" %}selected{% endif %}>Type 4</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="ProductDescription">Description</label>
+            <textarea id="ProductDescription" name="ProductDescription" required>{{ product.ProductDescription }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="ProductBarcode">Barcode</label>
+            <input type="text" id="ProductBarcode" name="ProductBarcode" value="{{ product.ProductBarcode }}" readonly>
+        </div>
+
+        <!-- Barcode image will only display if there is an existing barcode -->
+        {% if product.BarcodeImage %}
+            <div class="barcode-image">
+                <label>Existing Barcode Image:</label>
+                <img src="{{ product.BarcodeImage.url }}" alt="Product Barcode" style="width: 150px; height: auto; margin-top: 10px;">
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <button type="submit">Save Changes</button>
+        </div>
+
+        <div class="form-group">
+            <a href="{% url 'product_list' %}" class="cancel-btn">Cancel</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
