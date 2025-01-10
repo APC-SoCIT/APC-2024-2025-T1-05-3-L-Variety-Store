@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2em;
+            color: #333;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            font-size: 1.1em;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        img {
+            width: 100px;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .create-btn {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.1em;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .create-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .create-btn {
+                width: 180px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Product List</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Project Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Barcode Number</th>
+            <th>Barcode</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.ProjectName }}</td>
+                <td>{{ product.ProductQuantity }}</td>
+                <td>{{ product.ProductPrice }}</td>
+                <td>{{ product.ProductBarcode }}</td>
+                <td>
+                    {% if product.BarcodeImage %}
+                        <img src="{{ product.BarcodeImage.url }}" alt="Barcode for {{ product.ProjectName }}">
+                    {% else %}
+                        No barcode available
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'product_edit' product.ProductId %}">Edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'product_create' %}" class="create-btn">Create New Product</a>
+
+</body>
+</html>
