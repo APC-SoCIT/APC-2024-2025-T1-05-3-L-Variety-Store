@@ -4,144 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        h1 {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 2em;
-            color: #333;
-        }
-
-        table {
-            width: 90%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            background-color: #fff;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        thead {
-            background-color: #4CAF50;
-            color: #fff;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            font-size: 1.1em;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        img {
-            width: 100px;
-            height: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 5px;
-        }
-
-        a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .create-btn {
-            display: block;
-            width: 200px;
-            margin: 30px auto;
-            padding: 10px;
-            text-align: center;
-            background-color: #4CAF50;
-            color: white;
-            font-size: 1.1em;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-
-        .create-btn:hover {
-            background-color: #45a049;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            table {
-                width: 100%;
-                font-size: 0.9em;
-            }
-
-            th, td {
-                padding: 10px;
-            }
-
-            .create-btn {
-                width: 180px;
-                font-size: 1em;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 </head>
 <body>
+    <div class="container mt-5">
+        <!-- Page Title -->
+        <h1 class="text-center mb-4">Product List</h1>
 
-<h1>Product List</h1>
+        <!-- Create New Product Button -->
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'product_create' %}" class="btn btn-primary">Create New Product</a>
+        </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>Project Name</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Barcode Number</th>
-            <th>Barcode</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for product in products %}
-            <tr>
-                <td>{{ product.ProjectName }}</td>
-                <td>{{ product.ProductQuantity }}</td>
-                <td>{{ product.ProductPrice }}</td>
-                <td>{{ product.ProductBarcode }}</td>
-                <td>
-                    {% if product.BarcodeImage %}
-                        <img src="{{ product.BarcodeImage.url }}" alt="Barcode for {{ product.ProjectName }}">
-                    {% else %}
-                        No barcode available
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'product_edit' product.ProductId %}">Edit</a>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <!-- Product Table -->
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Project Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Barcode Number</th>
+                    <th>Barcode</th>
+                    <th>Supplier</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>{{ product.ProjectName }}</td>
+                        <td>{{ product.ProductQuantity }}</td>
+                        <td>${{ product.ProductPrice }}</td>
+                        <td>{{ product.ProductBarcode }}</td>
+                        <td>
+                            {% if product.BarcodeImage %}
+                                <img src="{{ product.BarcodeImage.url }}" alt="Barcode for {{ product.ProjectName }}" style="width: 100px; height: auto;">
+                            {% else %}
+                                <span class="text-muted">No barcode available</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if product.Supplier %}
+                                <a href="{% url 'supplier_detail' product.Supplier.SupplierId %}">
+                                    {{ product.Supplier.FirstName }} {{ product.Supplier.LastName }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">No supplier assigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'product_edit' product.ProductId %}" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="{% url 'product_delete' product.ProductId %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">No products found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        
+        </tab>
 
-<a href="{% url 'product_create' %}" class="create-btn">Create New Product</a>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
