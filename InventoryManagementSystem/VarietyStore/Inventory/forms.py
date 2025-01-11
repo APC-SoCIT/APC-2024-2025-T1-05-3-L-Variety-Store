@@ -12,13 +12,14 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'ProjectName',
+            'ProductName',
             'ProductDescription',
             'ProductQuantity',
             'ProductType',
             'ProductPrice',
             'ProductBarcode',
             'BarcodeImage',
+            'ProductImage',
             'Suppliers',
         ]
 

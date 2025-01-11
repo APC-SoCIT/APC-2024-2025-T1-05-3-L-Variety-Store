@@ -9,39 +9,61 @@ from django.db.models import ObjectDoesNotExist
 # Create your views here.
 
 # List products
+from decimal import Decimal
+
+# Helper function for formatting price
+def format_price(price, currency='PHP'):
+    conversion_rates = {
+        'USD': Decimal('1.0'),
+        'EUR': Decimal('0.85'),
+        'JPY': Decimal('110.0'),
+        'GBP': Decimal('0.75'),
+        'PHP': Decimal('50.0'),
+    }
+    if currency in conversion_rates:
+        converted_price = price / conversion_rates['PHP'] * conversion_rates[currency]  # Assuming price is in PHP
+        return f'{converted_price:.2f} {currency}'
+    return f'{price:.2f} PHP'
+
+
+# Updated product_list view
 def product_list(request):
-    products = Product.objects.prefetch_related('Suppliers')  # Optimize query for suppliers
-    return render(request, 'inventory/product_list.html', {'products': products})
+    products = Product.objects.all()
+    selected_currency = request.GET.get('currency', 'PHP')  # Default to PHP
 
-def product_create(request):
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)  # Save the product details
-            product.save()  # Save the product instance
+    # Add formatted prices to each product
+    formatted_products = []
+    for product in products:
+        formatted_products.append({
+            'id': product.ProductId,
+            'image': product.ProductImage.url if product.ProductImage else None,
+            'name': product.ProductName,
+            'type': product.ProductType,
+            'barcode': product.ProductBarcode,
+            'suppliers': product.Suppliers.all(),
+            'price': format_price(product.ProductPrice, selected_currency),
+        })
 
-            # Handle suppliers
-            supplier_ids = request.POST.getlist('Suppliers')  # Retrieve selected suppliers
-            if supplier_ids and any(supplier_ids):  # Check if at least one supplier is selected
-                valid_suppliers = Supplier.objects.filter(SupplierId__in=supplier_ids)
-                product.Suppliers.set(valid_suppliers)  # Update suppliers
-            else:
-                product.Suppliers.clear()  # Clear suppliers if "No Supplier" is selected
-
-            # Redirect after saving
-            messages.success(request, f"Product '{product.ProjectName}' created successfully.")
-            return redirect('product_list')
-    else:
-        form = ProductForm()
-
-    suppliers = Supplier.objects.all()
-    return render(request, 'inventory/product_form.html', {
-        'form': form,
-        'suppliers': suppliers,
-        'product_form_title': 'Add Product',
+    return render(request, 'inventory/product_list.html', {
+        'products': formatted_products,
+        'currency': selected_currency,  # Pass the selected currency to the template
     })
 
 
+def product_create(request):
+    currency = request.GET.get('currency', 'PHP')  # Default to PHP if not provided
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save()
+            return redirect('product_list')
+    else:
+        form = ProductForm()
+    return render(request, 'inventory/product_form.html', {
+        'form': form,
+        'currency': currency,
+        'product_form_title': 'Add Product',
+    })
 
 
 
@@ -50,23 +72,12 @@ def product_edit(request, ProductId):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            product = form.save(commit=False)  # Save the product details
-            product.save()  # Save the product instance
-
-            # Handle suppliers
-            supplier_ids = request.POST.getlist('Suppliers')  # Retrieve selected suppliers
-            if supplier_ids and any(supplier_ids):  # Check if at least one supplier is selected
-                valid_suppliers = Supplier.objects.filter(SupplierId__in=supplier_ids)
-                product.Suppliers.set(valid_suppliers)  # Update suppliers
-            else:
-                product.Suppliers.clear()  # Clear suppliers if "No Supplier" is selected
-
-            # Redirect after saving
-            messages.success(request, f"Product '{product.ProjectName}' updated successfully.")
+            form.save()  # Save the updated product
             return redirect('product_list')
     else:
-        form = ProductForm(instance=product)
+        form = ProductForm(instance=product)  # Initialize with existing product data
 
+    # Pass all suppliers for the dropdown
     suppliers = Supplier.objects.all()
     return render(request, 'inventory/product_form.html', {
         'form': form,
@@ -74,6 +85,8 @@ def product_edit(request, ProductId):
         'product': product,
         'product_form_title': 'Edit Product',
     })
+
+
 
 
 
@@ -124,3 +137,4 @@ def delete_product(request, product_id):
     product.delete()
     messages.success(request, f'Product "{product_name}" has been successfully deleted.')
     return redirect('product_list')  # Replace 'product_list' with the name of your product list view
+

@@ -43,17 +43,18 @@ barcode_storage = FileSystemStorage(location='media/barcodes')
 
 class Product(models.Model):
     ProductId = models.AutoField(primary_key=True)
-    ProjectName = models.CharField(max_length=200)
+    ProductName = models.CharField(max_length=200)
     ProductDescription = models.TextField()
     ProductQuantity = models.PositiveIntegerField()
     ProductType = models.CharField(max_length=100)
     ProductPrice = models.DecimalField(max_digits=10, decimal_places=2)
     ProductBarcode = models.CharField(max_length=50, unique=True, blank=True)
     BarcodeImage = models.ImageField(upload_to='barcodes/', storage=barcode_storage, blank=True)
+    ProductImage = models.ImageField(upload_to='product_images/', blank=True, null=True)
     Suppliers = models.ManyToManyField('Supplier', blank=True)  # Use ManyToManyField for multiple suppliers
 
     def __str__(self):
-        return self.ProjectName
+        return self.ProductName
 
     def generate_barcode(self):
         """Generate a unique barcode and save it as an image."""
