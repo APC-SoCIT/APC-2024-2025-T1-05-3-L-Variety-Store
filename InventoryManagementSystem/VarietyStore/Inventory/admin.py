@@ -7,6 +7,4 @@ admin.site.register(Employee)
 admin.site.register(Supplier)
 admin.site.register(Product)
 
-    
-    
 

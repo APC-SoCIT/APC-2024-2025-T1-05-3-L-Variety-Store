@@ -4,16 +4,23 @@ from .models import Product, Supplier
 class ProductForm(forms.ModelForm):
     Suppliers = forms.ModelMultipleChoiceField(
         queryset=Supplier.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        required=False,  # Allow no suppliers
+        label="Suppliers"
     )
 
     class Meta:
         model = Product
-        fields = ['ProjectName', 'ProductQuantity', 'ProductPrice', 'ProductBarcode', 'BarcodeImage', 'Suppliers']
-
-from django import forms
-from .models import Supplier
+        fields = [
+            'ProjectName',
+            'ProductDescription',
+            'ProductQuantity',
+            'ProductType',
+            'ProductPrice',
+            'ProductBarcode',
+            'BarcodeImage',
+            'Suppliers',
+        ]
 
 class SupplierForm(forms.ModelForm):
     class Meta:

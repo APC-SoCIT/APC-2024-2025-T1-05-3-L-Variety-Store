@@ -50,7 +50,7 @@ class Product(models.Model):
     ProductPrice = models.DecimalField(max_digits=10, decimal_places=2)
     ProductBarcode = models.CharField(max_length=50, unique=True, blank=True)
     BarcodeImage = models.ImageField(upload_to='barcodes/', storage=barcode_storage, blank=True)
-    Supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
+    Suppliers = models.ManyToManyField('Supplier', blank=True)  # Use ManyToManyField for multiple suppliers
 
     def __str__(self):
         return self.ProjectName

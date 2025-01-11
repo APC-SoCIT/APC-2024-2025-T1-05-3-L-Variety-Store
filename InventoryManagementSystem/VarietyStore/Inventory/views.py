@@ -3,54 +3,81 @@ from .models import Product
 from .forms import ProductForm, SupplierForm
 from .models import Supplier
 from django.contrib import messages
+from django.db.models import ObjectDoesNotExist
+
 
 # Create your views here.
 
 # List products
 def product_list(request):
-    products = Product.objects.all()
+    products = Product.objects.prefetch_related('Suppliers')  # Optimize query for suppliers
     return render(request, 'inventory/product_list.html', {'products': products})
 
-# Create a new product
 def product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            product = form.save(commit=False)
-            product.save()
-            form.save_m2m()  # Save the many-to-many relationships
+            product = form.save(commit=False)  # Save the product details
+            product.save()  # Save the product instance
+
+            # Handle suppliers
+            supplier_ids = request.POST.getlist('Suppliers')  # Retrieve selected suppliers
+            if supplier_ids and any(supplier_ids):  # Check if at least one supplier is selected
+                valid_suppliers = Supplier.objects.filter(SupplierId__in=supplier_ids)
+                product.Suppliers.set(valid_suppliers)  # Update suppliers
+            else:
+                product.Suppliers.clear()  # Clear suppliers if "No Supplier" is selected
+
+            # Redirect after saving
+            messages.success(request, f"Product '{product.ProjectName}' created successfully.")
             return redirect('product_list')
     else:
         form = ProductForm()
-    return render(request, 'inventory/product_form.html', {'form': form})
+
+    suppliers = Supplier.objects.all()
+    return render(request, 'inventory/product_form.html', {
+        'form': form,
+        'suppliers': suppliers,
+        'product_form_title': 'Add Product',
+    })
+
+
+
 
 
 def product_edit(request, ProductId):
-    product = get_object_or_404(Product, pk=ProductId)
+    product = get_object_or_404(Product, ProductId=ProductId)
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            product = form.save(commit=False)
-            product.save()
-            form.save_m2m()  # Save the many-to-many relationships
-            return redirect('product_list')
-    else:
-        form = ProductForm(instance=product)
-    return render(request, 'inventory/product_form.html', {'form': form})
+            product = form.save(commit=False)  # Save the product details
+            product.save()  # Save the product instance
 
-# Edit a product
-def product_edit(request, ProductId):
-    product = get_object_or_404(Product, pk=ProductId)
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.save()
-            form.save_m2m()  # Save the many-to-many relationships
+            # Handle suppliers
+            supplier_ids = request.POST.getlist('Suppliers')  # Retrieve selected suppliers
+            if supplier_ids and any(supplier_ids):  # Check if at least one supplier is selected
+                valid_suppliers = Supplier.objects.filter(SupplierId__in=supplier_ids)
+                product.Suppliers.set(valid_suppliers)  # Update suppliers
+            else:
+                product.Suppliers.clear()  # Clear suppliers if "No Supplier" is selected
+
+            # Redirect after saving
+            messages.success(request, f"Product '{product.ProjectName}' updated successfully.")
             return redirect('product_list')
     else:
         form = ProductForm(instance=product)
-    return render(request, 'inventory/product_form.html', {'form': form})
+
+    suppliers = Supplier.objects.all()
+    return render(request, 'inventory/product_form.html', {
+        'form': form,
+        'suppliers': suppliers,
+        'product': product,
+        'product_form_title': 'Edit Product',
+    })
+
+
+
+
 
 
 def create_supplier(request):
