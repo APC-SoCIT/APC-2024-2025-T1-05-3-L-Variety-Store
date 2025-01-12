@@ -3,8 +3,7 @@ from .models import Product
 from .forms import ProductForm, SupplierForm
 from .models import Supplier
 from django.contrib import messages
-from django.db.models import ObjectDoesNotExist
-
+from barcode.writer import ImageWriter
 
 # Create your views here.
 
@@ -123,5 +122,4 @@ def delete_product(request, product_id):
     product.delete()
     messages.success(request, f'Product "{product_name}" has been successfully deleted.')
     return redirect('product_list')
-
 
