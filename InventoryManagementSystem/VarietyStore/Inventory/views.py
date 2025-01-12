@@ -50,67 +50,34 @@ def product_list(request):
     })
 
 
-
-
-def product_create(request):
+def product_create_or_edit(request, ProductId=None):
+    # If ProductId is provided, fetch the product for editing
+    product = None
+    if ProductId:
+        product = get_object_or_404(Product, ProductId=ProductId)
+    
+    # Handle the form submission (both for creating and editing)
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        form = ProductForm(request.POST, request.FILES, instance=product)  # Pass the existing product for editing
         if form.is_valid():
-            product = form.save(commit=False)  # Save the product instance but don't commit yet
-            product.save()  # Save the product instance
-
-            # Save the many-to-many relationship
-            suppliers = request.POST.getlist('Suppliers')  # Get the list of supplier IDs
-            product.Suppliers.set(suppliers)  # Set the ManyToManyField
-
-            return redirect('product_list')  # Replace with the appropriate URL
+            form.save()  # Save the new or updated product
+            return redirect('product_list')  # Redirect to the product list after saving
     else:
-        form = ProductForm()
+        form = ProductForm(instance=product)  # Initialize the form with existing product data (if editing)
+    
+    # Pass all suppliers for the dropdown
+    suppliers = Supplier.objects.all()
 
-    suppliers = Supplier.objects.all()  # Fetch all suppliers for dropdown options
-    return render(request, 'inventory/product_form.html', {
-        'form': form,
-        'suppliers': suppliers,  # Send all suppliers to the template
-        'product': None,  # No product data since it's a new product
-        'product_form_title': 'Create Product',
-    })
-
-
-
-
-
-def product_edit(request, ProductId):
-    product = get_object_or_404(Product, ProductId=ProductId)
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            product = form.save(commit=False)  # Save the product instance but don't commit yet
-            product.save()  # Save the product instance
-
-            # Update the many-to-many relationship
-            suppliers = request.POST.getlist('Suppliers')  # Get the list of supplier IDs
-            product.Suppliers.set(suppliers)  # Set the ManyToManyField
-
-            return redirect('product_list')  # Replace with the appropriate URL
-    else:
-        form = ProductForm(instance=product)
-
-    suppliers = Supplier.objects.all()  # Fetch all suppliers for dropdown options
+    # Set the appropriate title based on whether the product exists (edit or create)
+    form_title = 'Edit Product' if product else 'Create Product'
+    
     return render(request, 'inventory/product_form.html', {
         'form': form,
         'suppliers': suppliers,
-        'product': product,  # Pass the product for existing supplier prepopulation
-        'product_form_title': 'Edit Product',
+        'product': product,
+        'product_form_title': form_title,
     })
-
-
-
-
-
-
-
-
-
+    
 def create_supplier(request):
     if request.method == 'POST':
         form = SupplierForm(request.POST)
@@ -136,6 +103,7 @@ def update_supplier(request, pk):
     else:
         form = SupplierForm(instance=supplier)
     return render(request, 'inventory/update_supplier.html', {'form': form})
+
 def delete_supplier(request, pk):
     supplier = get_object_or_404(Supplier, pk=pk)
     if request.method == "POST":

@@ -90,7 +90,7 @@
     
         .supplier-link {
             font-size: 0.9em;
-            color:rgb(92, 76, 175);
+            color: #4CAF50;
             text-decoration: none;
             margin-bottom: 15px;
         }
@@ -139,8 +139,11 @@
             cursor: not-allowed;
         }
     </style>
+    
+    
+    
+    
 </head>
-
 <script>
     // Add supplier dropdown dynamically
     function addSupplierDropdown() {
@@ -243,17 +246,17 @@
     <input 
         type="text" 
         id="BarcodeNumber" 
-        name="BarcodeNumber" 
+        name="ProductBarcode" 
         value="{{ product.ProductBarcode|default_if_none:'' }}" 
-        readonly>
+        required>
 
     <!-- Product Picture -->
     <label for="ProductImage">Product Picture:</label>
     {% if product.ProductImage %}
-    <div class="mb-3">
-        <img src="{{ product.ProductImage.url }}" alt="Current Product Image" style="width: 150px; height: auto; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px;">
-        <p class="text-muted">Current Picture</p>
-    </div>
+        <div class="mb-3">
+            <img src="{{ product.ProductImage.url }}" alt="Current Product Image" style="width: 150px; height: auto; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px;">
+            <p class="text-muted">Current Picture</p>
+        </div>
     {% endif %}
     <input 
         type="file" 
@@ -262,13 +265,11 @@
         accept="image/*">
 
     <!-- Suppliers Section -->
-    <div id="suppliers-container" class="mb-4">
-        {% if product and product.Suppliers.all %}
-        <!-- Prepopulate dropdowns with existing suppliers -->
+    <div id="suppliers-container">
         {% for supplier in product.Suppliers.all %}
         <div class="mb-3 supplier-entry">
-            <label class="form-label">Supplier {{ forloop.counter }}</label>
-            <select name="Suppliers" class="form-control">
+            <label for="Supplier{{ forloop.counter }}" class="form-label">Supplier {{ forloop.counter }}</label>
+            <select name="Suppliers" id="Supplier{{ forloop.counter }}" class="form-control">
                 <option value="">No Supplier</option>
                 {% for sup in suppliers %}
                     <option value="{{ sup.SupplierId }}" {% if sup.SupplierId == supplier.SupplierId %}selected{% endif %}>
@@ -276,62 +277,19 @@
                     </option>
                 {% endfor %}
             </select>
-            <button type="button" class="btn btn-danger remove-supplier-btn" onclick="removeSupplierDropdown(this)">Remove</button>
+            <button type="button" class="remove-supplier-btn" onclick="removeSupplierDropdown(this)">Remove</button>
         </div>
         {% endfor %}
-        {% else %}
-        <p>No suppliers selected. Add a supplier if needed.</p>
-        {% endif %}
     </div>
-
-    <!-- Add Supplier Button -->
-    <div class="mb-4">
-        <button type="button" id="add-supplier-btn" class="btn btn-success" onclick="addSupplierDropdown()">Add Supplier</button>
-    </div>
+    <button type="button" class="add-supplier-btn" onclick="addSupplierDropdown()">Add Supplier</button>
 
     <!-- Save and Cancel Buttons -->
-    <div class="d-flex justify-content-between mt-4">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="{% url 'product_list' %}" class="btn btn-danger">Cancel</a>
+    <div class="form-actions">
+        <button type="submit" class="btn">Save Product</button>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancel</a>
     </div>
-
 </form>
 
-<script>
-    function updateSupplierLabels() {
-        const supplierEntries = document.querySelectorAll('.supplier-entry');
-        supplierEntries.forEach((entry, index) => {
-            const label = entry.querySelector('.form-label');
-            label.textContent = `Supplier ${index + 1}`;
-        });
-    }
-
-    function addSupplierDropdown() {
-        const container = document.getElementById('suppliers-container');
-        const newSupplierDiv = document.createElement('div');
-        newSupplierDiv.className = 'mb-4 supplier-entry'; // Added extra margin for spacing
-        newSupplierDiv.innerHTML = `
-            <label class="form-label">Supplier</label>
-            <select name="Suppliers" class="form-control">
-                <option value="">No Supplier</option>
-                {% for sup in suppliers %}
-                    <option value="{{ sup.SupplierId }}">
-                        {{ sup.FirstName }} {{ sup.LastName }}
-                    </option>
-                {% endfor %}
-            </select>
-            <button type="button" class="btn btn-danger remove-supplier-btn" onclick="removeSupplierDropdown(this)">Remove</button>
-        `;
-        container.appendChild(newSupplierDiv);
-        updateSupplierLabels(); // Update the labels after adding
-    }
-
-    function removeSupplierDropdown(button) {
-        const supplierEntry = button.parentElement;
-        supplierEntry.remove();
-        updateSupplierLabels(); // Update the labels after removing
-    }
-</script>
 
 </body>
 </html>

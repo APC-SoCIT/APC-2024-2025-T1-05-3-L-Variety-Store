@@ -17,10 +17,10 @@ class ProductForm(forms.ModelForm):
             'ProductQuantity',
             'ProductType',
             'ProductPrice',
-            'ProductBarcode',
             'BarcodeImage',
             'ProductImage',
             'Suppliers',
+            'ProductBarcode',
         ]
 
 class SupplierForm(forms.ModelForm):
