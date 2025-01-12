@@ -5,6 +5,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from PIL import Image
 from django.utils.crypto import get_random_string
+import uuid
 
 # Employee List Model
 class Employee(models.Model):
@@ -49,17 +50,18 @@ class Product(models.Model):
 
     def generate_barcode(self):
         """
-        Generate a unique barcode for the product and store it.
+        Generate a unique barcode for the product and store it as a Code128 barcode.
         """
         barcode_number = get_random_string(length=12, allowed_chars='0123456789')
+        
         # Ensure barcode is unique
         while Product.objects.filter(ProductBarcode=barcode_number).exists():
             barcode_number = get_random_string(length=12, allowed_chars='0123456789')
 
         self.ProductBarcode = barcode_number
 
-        # Generate barcode image using the 'ean13' format or any other format
-        code = barcode.get_barcode_class('ean13')
+        # Generate barcode image using the 'code128' format
+        code = barcode.get_barcode_class('code128')  # Switch to 'code128'
         barcode_instance = code(barcode_number, writer=ImageWriter())
         buffer = BytesIO()
         barcode_instance.write(buffer)
@@ -67,13 +69,12 @@ class Product(models.Model):
         # Save the barcode image to the product model
         file_name = f"barcode_{barcode_number}.png"
         content = ContentFile(buffer.getvalue())
-        self.ProductBarcodeImage.save(file_name, content)
+        self.BarcodeImage.save(file_name, content)  # Save barcode image in BarcodeImage field
 
     def save(self, *args, **kwargs):
-        if not self.ProductBarcode:  # Generate barcode if not already set
-            self.generate_barcode()
-
-        super(Product, self).save(*args, **kwargs)
+        if not self.ProductBarcode:
+            self.generate_barcode()  # Generate the barcode before saving
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.ProductName
