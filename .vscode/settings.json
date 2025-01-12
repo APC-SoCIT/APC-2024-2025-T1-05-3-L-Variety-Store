@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./InventoryManagementSystem/VarietyStore/Inventory/migrations/0002_product_barcodeimage_alter_product_product",
+        "./InventoryManagementSystem/VarietyStore/Inventory/migrations/0002_product_barcodeimage_alter_product_product"
+    ]
+}
