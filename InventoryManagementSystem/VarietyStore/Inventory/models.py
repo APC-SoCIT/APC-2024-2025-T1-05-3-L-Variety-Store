@@ -7,20 +7,6 @@ from PIL import Image
 from django.utils.crypto import get_random_string
 import uuid
 
-# Employee List Model
-class Employee(models.Model):
-    EmployeeId = models.AutoField(primary_key=True)
-    FirstName = models.CharField(max_length=100)
-    LastName = models.CharField(max_length=100)
-    Email = models.EmailField()
-    Username = models.CharField(max_length=100)
-    PasswordHash = models.CharField(max_length=200)
-    HireDate = models.DateTimeField(auto_now_add=True)
-    Role = models.CharField(max_length=100)
-    AdminRoleConfiguration = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f'{self.FirstName} {self.LastName}'
 
 # Supplier Information Model
 class Supplier(models.Model):

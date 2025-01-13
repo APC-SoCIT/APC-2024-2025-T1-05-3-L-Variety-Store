@@ -1,11 +1,11 @@
 from django.contrib import admin
-from .models import Employee, Supplier, Product
+from .models import Supplier, Product
 from django.shortcuts import render
 from .models import Product
 
 # Register your models here.
 
-admin.site.register(Employee)
+
 admin.site.register(Supplier)
 admin.site.register(Product)
 
