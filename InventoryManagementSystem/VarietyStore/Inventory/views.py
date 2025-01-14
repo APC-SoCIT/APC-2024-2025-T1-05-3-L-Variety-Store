@@ -4,11 +4,9 @@ from .forms import ProductForm, SupplierForm
 from .models import Supplier
 from django.contrib import messages
 from barcode.writer import ImageWriter
-
-# Create your views here.
-
-# List products
+from accounts.decorators import user_has_role
 from decimal import Decimal
+
 
 # Helper function for formatting price
 def format_price(price, currency='PHP'):
@@ -25,6 +23,7 @@ def format_price(price, currency='PHP'):
     return f'{price:.2f} PHP'
 
 # Updated product_list view
+@user_has_role('Inventory Staff')
 def product_list(request):
     products = Product.objects.all()
     selected_currency = request.GET.get('currency', 'PHP')  # Default to PHP
