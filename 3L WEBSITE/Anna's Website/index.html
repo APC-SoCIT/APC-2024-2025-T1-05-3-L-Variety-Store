@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-L Variety Store</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="3-L Variety Store - Your one-stop shop for fresh meats, seafood, and ready-to-cook meals. Next day delivery available!">
+    <meta name="keywords" content="fresh meat, seafood, ready to cook, food delivery, 3-L Variety Store">
+    <meta name="author" content="3-L Variety Store">
+    <meta property="og:title" content="3-L Variety Store - Fresh & Flavorful Food Delivered">
+    <meta property="og:description" content="Quality fresh meats and seafood delivered to your doorstep">
+    <meta property="og:image" content="path/to/og-image.jpg">
+    <link rel="icon" type="image/x-icon" href="path/to/favicon.ico">
+
+</head>
+<body>
+    <!-- Top Banner -->
+    <div class="top-banner">
+        NEXT DAY delivery | FREE DELIVERY on orders Php 2,000+ | Contact us at: 0917 823 4635
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html">
+                <img src="image/new_logo1.png" alt="3-L Variety Store Logo" class="logo">
+            </a>
+            <input type="search" class="search-bar" placeholder="Search for products...">
+            <div class="header-links">
+                <a href="#">Recipes</a>
+                <a href="#">Blog</a>
+                <a href="#">Franchise</a>
+                <a href="#">FAQ</a>
+                <a href="#">Stores</a>
+                <a href="#">Contact Us</a>
+                <a href="login.html">My Account</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="#">Home</a></li>
+            <li class="nav-item"><a href="#">Pork</a></li>
+            <li class="nav-item"><a href="#">Chicken</a></li>
+            <li class="nav-item"><a href="#">Beef</a></li>
+            <li class="nav-item"><a href="#">Ready To Cook</a></li>
+            <li class="nav-item"><a href="#">Seafood</a></li>
+            <li class="nav-item"><a href="#">Eggs</a></li>
+            <li class="nav-item"><a href="#">Others</a></li>
+            <li class="nav-item"><a href="#">Sale</a></li>
+            <li class="nav-item"><a href="#">Gift Card</a></li>
+            <li class="nav-item"><a href="cart.html" class="active">Cart</a></li>
+        </ul>
+    </nav>
+
+    <!-- Category Icons -->
+    <section class="category-section">
+        <div class="category-container">
+            <div class="category-item">
+                <div class="category-icon">
+                    <img src="image/pork.png" alt="Pork">
+                </div>
+                <div class="category-text">Pork</div>
+                <div class="items-count">24 items</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">
+                    <img src="image/chicken.png" alt="Chicken">
+                </div>
+                <div class="category-text">Chicken</div>
+                <div class="items-count">6 items</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">
+                    <img src="image/beef.png" alt="Beef Silhouette">
+                </div>
+                <div class="category-text">Beef</div>
+                <div class="items-count">13 items</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">
+                    <img src="image/seafood.png" alt="Seafood">
+                </div>
+                <div class="category-text">Seafood</div>
+                <div class="items-count">8 items</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">
+                    <img src="image/ready.png" alt="Ready To Cook">
+                </div>
+                <div class="category-text">Ready To Cook</div>
+                <div class="items-count">51 items</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">
+                    <img src="image/egg.png" alt="Eggs">
+                </div>
+                <div class="category-text">Eggs</div>
+                <div class="items-count">4 items</div>
+            </div>
+            <div class="category-item">
+                <div class="category-icon">
+                    <img src="image/bag.png" alt="Others">
+                </div>
+                <div class="category-text">Others</div>
+                <div class="items-count">6 items</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Items -->
+    <section class="new-items">
+        <h2>New Items</h2>
+        <div class="products-container">
+            <button class="arrow-btn left">&#10094;</button>
+            <div class="product-cards">
+                <!-- Product Cards -->
+                <div class="product-card">
+                    <img src="images/brick-ham.jpg" alt="Brick Ham">
+                    <div class="product-label green">BRICK HAM</div>
+                    <div class="product-weight">400g</div>
+                    <h3>Brick Ham (400g)</h3>
+                    <div class="stock-status">
+                        <span class="in-stock">✓ In Stock</span>
+                    </div>
+                    <p class="price">₱230.00</p>
+                    <div class="quantity-control">
+                        <button class="qty-btn minus">-</button>
+                        <input type="number" value="1" min="1" class="quantity-input">
+                        <button class="qty-btn plus">+</button>
+                    </div>
+                    <button class="add-to-cart" data-name="Brick Ham" data-price="230" data-weight="400">Add to cart</button>
+                </div>
+
+                <div class="product-card">
+                    <img src="images/chicken-thigh.jpg" alt="Chicken Thigh">
+                    <div class="product-label green">CHICKEN THIGH</div>
+                    <div class="product-weight">500g</div>
+                    <h3>Chicken Thigh (500g)</h3>
+                    <div class="stock-status">
+                        <span class="in-stock">✓ In Stock</span>
+                    </div>
+                    <p class="price">₱180.00</p>
+                    <div class="quantity-control">
+                        <button class="qty-btn minus">-</button>
+                        <input type="number" value="1" min="1" class="quantity-input">
+                        <button class="qty-btn plus">+</button>
+                    </div>
+                    <button class="add-to-cart" data-name="Chicken Thigh" data-price="180" data-weight="500">Add to cart</button>
+                </div>
+
+                <div class="product-card">
+                    <img src="images/beef-steak.jpg" alt="Beef Steak">
+                    <div class="product-label green">BEEF STEAK</div>
+                    <div class="product-weight">300g</div>
+                    <h3>Beef Steak (300g)</h3>
+                    <div class="stock-status">
+                        <span class="in-stock">✓ In Stock</span>
+                    </div>
+                    <p class="price">₱350.00</p>
+                    <div class="quantity-control">
+                        <button class="qty-btn minus">-</button>
+                        <input type="number" value="1" min="1" class="quantity-input">
+                        <button class="qty-btn plus">+</button>
+                    </div>
+                    <button class="add-to-cart" data-name="Beef Steak" data-price="350" data-weight="300">Add to cart</button>
+                </div>
+
+                <div class="product-card">
+                    <img src="images/seafood-mix.jpg" alt="Seafood Mix">
+                    <div class="product-label green">SEAFOOD MIX</div>
+                    <div class="product-weight">600g</div>
+                    <h3>Seafood Mix (600g)</h3>
+                    <div class="stock-status">
+                        <span class="in-stock">✓ In Stock</span>
+                    </div>
+                    <p class="price">₱400.00</p>
+                    <div class="quantity-control">
+                        <button class="qty-btn minus">-</button>
+                        <input type="number" value="1" min="1" class="quantity-input">
+                        <button class="qty-btn plus">+</button>
+                    </div>
+                    <button class="add-to-cart" data-name="Seafood Mix" data-price="400" data-weight="600">Add to cart</button>
+                </div>
+
+                <div class="product-card">
+                    <img src="images/ready-meal.jpg" alt="Ready Meal">
+                    <div class="product-label green">READY MEAL</div>
+                    <div class="product-weight">500g</div>
+                    <h3>Ready Meal (500g)</h3>
+                    <div class="stock-status">
+                        <span class="in-stock">✓ In Stock</span>
+                    </div>
+                    <p class="price">₱250.00</p>
+                    <div class="quantity-control">
+                        <button class="qty-btn minus">-</button>
+                        <input type="number" value="1" min="1" class="quantity-input">
+                        <button class="qty-btn plus">+</button>
+                    </div>
+                    <button class="add-to-cart" data-name="Ready Meal" data-price="250" data-weight="500">Add to cart</button>
+                </div>
+            </div>
+            <button class="arrow-btn right">&#10095;</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About 3-L Variety Store</h3>
+                <p>3-L Variety store provides and delivers premium quality meats and frozen products</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Delivery Information</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: info@3lvarietystore.com</p>
+                <p>Phone: 0967 315 8034</p>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/3LFrozenGoodsOrmoc" target="_blank" rel="noopener noreferrer">
+                        <img src="path/to/facebook-icon.png" alt="Facebook">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 3-L Variety Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Cookie Notice -->
+    <div class="cookie-notice">
+        We use cookies to ensure you get the best experience while browsing our site. By continued use, you agree to our privacy statement and accept our use of such cookies.
+        <button onclick="acceptCookies()">OK</button>
+        <button onclick="viewPrivacyStatement()">Privacy Statement</button>
+    </div>
+
+    <script>
+        function acceptCookies() {
+            document.querySelector('.cookie-notice').style.display = 'none';
+        }
+
+        function viewPrivacyStatement() {
+            // Add privacy statement logic here
+        }
+    </script>
+
+    <script src="script.js"></script>
+
+    <script>
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const cartCountElement = document.getElementById('cart-count');
+        const notificationElement = document.getElementById('notification');
+
+        function updateCartCount() {
+            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCountElement.textContent = totalItems; // Update the badge count
+        }
+
+        function showNotification(message) {
+            notificationElement.textContent = message;
+            notificationElement.style.display = 'block';
+            setTimeout(() => {
+                notificationElement.style.display = 'none';
+            }, 3000); // Hide after 3 seconds
+        }
+
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', () => {
+                const productName = button.getAttribute('data-name');
+                const productPrice = button.getAttribute('data-price');
+                const productWeight = button.getAttribute('data-weight');
+                const quantity = 1; // Set default quantity to 1
+
+                const item = {
+                    name: productName,
+                    price: parseFloat(productPrice),
+                    weight: productWeight,
+                    quantity: quantity // Use the default quantity
+                };
+
+                // Check if item already exists in the cart
+                const existingItemIndex = cart.findIndex(cartItem => cartItem.name === item.name);
+                if (existingItemIndex > -1) {
+                    // Update quantity if item already exists
+                    cart[existingItemIndex].quantity += item.quantity;
+                } else {
+                    // Add new item to cart
+                    cart.push(item);
+                }
+
+                // Save updated cart to localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartCount(); // Update the cart count badge
+                showNotification(`${productName} has been added to your cart!`); // Show notification
+            });
+        });
+
+        // Initialize cart count on page load
+        updateCartCount();
+    </script>
+
+    <!-- Notification Message -->
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <!-- Cart Icon with Notification Badge -->
+    <a href="cart.html" class="cart-icon">
+        <img src="path/to/cart-icon.png" alt="Cart">
+        <span id="cart-count" class="badge">0</span> <!-- Notification Badge -->
+    </a>
+</body>
+</html>
