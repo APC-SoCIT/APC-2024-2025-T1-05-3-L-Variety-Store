@@ -6,9 +6,13 @@ from django.contrib import messages
 from barcode.writer import ImageWriter
 from accounts.decorators import user_has_role
 from decimal import Decimal
+from django import template
+
+register = template.Library()
 
 
 # Helper function for formatting price
+@register.filter
 def format_price(price, currency='PHP'):
     conversion_rates = {
         'USD': Decimal('1.0'),
@@ -26,7 +30,7 @@ def format_price(price, currency='PHP'):
 @user_has_role('Inventory Staff')
 def product_list(request):
     products = Product.objects.all()
-    selected_currency = request.GET.get('currency', 'PHP')  # Default to PHP
+    currency = request.GET.get('currency', 'PHP')  # Default to PHP
 
     # Add all necessary fields
     formatted_products = []
@@ -36,7 +40,7 @@ def product_list(request):
             'image': product.ProductImage.url if product.ProductImage else None,
             'name': product.ProductName,
             'type': product.ProductType,
-            'price': format_price(product.ProductPrice, selected_currency),
+            'price': format_price(product.ProductPrice, currency),
             'barcode': product.ProductBarcode,
             'barcode_image': product.BarcodeImage.url if product.BarcodeImage else None,
             'suppliers': product.Suppliers.all(),
@@ -44,7 +48,7 @@ def product_list(request):
 
     return render(request, 'inventory/product_list.html', {
         'products': formatted_products,
-        'currency': selected_currency,
+        'currency': currency,
     })
 
 

@@ -26,12 +26,6 @@ class Employee(models.Model):
     def __str__(self):
         return self.name
     
-class Employee(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
-
-    def __str__(self):
-        return self.user.username
 
 class Customers(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer', null=True)
