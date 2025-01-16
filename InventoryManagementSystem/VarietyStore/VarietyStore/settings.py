@@ -33,6 +33,8 @@ LOGIN_URL = '/admin/login/'
 # Application definition
 
 INSTALLED_APPS = [
+    'Sale',
+    'website',
     'accounts',
     'Inventory',
     'django.contrib.admin',
@@ -44,7 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'accounts.middleware.RoleBasedAccessMiddleware',
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

@@ -4,16 +4,98 @@ from .forms import ProductForm, SupplierForm
 from .models import Supplier
 from django.contrib import messages
 from barcode.writer import ImageWriter
-from accounts.decorators import user_has_role
+
 from decimal import Decimal
 from django import template
 
-register = template.Library()
+
 
 
 # Helper function for formatting price
-@register.filter
-def format_price(price, currency='PHP'):
+
+
+# Updated product_list view
+
+def product_list(request):
+    products = Product.objects.all()
+    
+    # Update active status based on stock and save changes to the database
+    for product in products:
+        if product.ProductQuantity == 0:  # Check stock value
+            product.ProductStatus = False  # Set active status to False
+            product.save()  # Save the changes to the database
+
+    currency = request.GET.get('currency', 'PHP')
+    product_type = request.GET.get('type', '')
+    search_query = request.GET.get('search', '')
+    sort_by = request.GET.get('sort', '')
+
+    # Get only unique product types that are used by products in the database
+    used_product_types = Product.objects.values_list('ProductType', flat=True).distinct()
+
+    # Filtering by product type
+    if product_type:
+        products = products.filter(ProductType=product_type)
+
+    # Search by product name
+    if search_query:
+        products = products.filter(ProductName__icontains=search_query)
+
+    # Sorting
+    if sort_by == 'price_asc':
+        products = products.order_by('ProductPrice')
+    elif sort_by == 'price_desc':
+        products = products.order_by('-ProductPrice')
+    elif sort_by == 'stock_asc':
+        products = products.order_by('ProductQuantity')
+    elif sort_by == 'stock_desc':
+        products = products.order_by('-ProductQuantity')
+    elif sort_by == 'active':
+        products = products.order_by('ProductStatus')
+
+    # Format the products for currency and other fields
+    formatted_products = []
+    for product in products:
+        formatted_price = format_price(product.ProductPrice, currency)
+        formatted_products.append({
+            'id': product.ProductId,
+            'image': product.ProductImage.url if product.ProductImage else None,
+            'name': product.ProductName,
+            'type': product.ProductType,
+            'price': formatted_price,
+            'barcode': product.ProductBarcode,
+            'barcode_image': product.BarcodeImage.url if product.BarcodeImage else None,
+            'active': product.ProductStatus,
+            'suppliers': product.Suppliers.all(),
+            'stock': product.ProductQuantity,
+        })
+
+    return render(request, 'inventory/product_list.html', {
+        'products': formatted_products,
+        'currency': currency,
+        'product_types': used_product_types,  # Pass the list of used product types
+    })
+
+
+    
+
+def format_price(value, currency='PHP'):
+    if value is None:
+        return f'0.00 {currency}'
+    
+    try:
+        value = Decimal(value)
+    except (ValueError, TypeError):
+        return f'{value} {currency}'
+    
+    # Currency symbols and conversion rates
+    symbols = {
+        'USD': '$',
+        'PHP': '₱',
+        'EUR': '€',
+        'JPY': '¥',
+        'GBP': '£',
+    }
     conversion_rates = {
         'USD': Decimal('1.0'),
         'EUR': Decimal('0.85'),
@@ -21,35 +103,15 @@ def format_price(price, currency='PHP'):
         'GBP': Decimal('0.75'),
         'PHP': Decimal('50.0'),
     }
+
     if currency in conversion_rates:
-        converted_price = price / conversion_rates['PHP'] * conversion_rates[currency]  # Assuming price is in PHP
-        return f'{converted_price:.2f} {currency}'
-    return f'{price:.2f} PHP'
-
-# Updated product_list view
-@user_has_role('Inventory Staff')
-def product_list(request):
-    products = Product.objects.all()
-    currency = request.GET.get('currency', 'PHP')  # Default to PHP
-
-    # Add all necessary fields
-    formatted_products = []
-    for product in products:
-        formatted_products.append({
-            'id': product.ProductId,
-            'image': product.ProductImage.url if product.ProductImage else None,
-            'name': product.ProductName,
-            'type': product.ProductType,
-            'price': format_price(product.ProductPrice, currency),
-            'barcode': product.ProductBarcode,
-            'barcode_image': product.BarcodeImage.url if product.BarcodeImage else None,
-            'suppliers': product.Suppliers.all(),
-        })
-
-    return render(request, 'inventory/product_list.html', {
-        'products': formatted_products,
-        'currency': currency,
-    })
+        converted_price = value / conversion_rates['PHP'] * conversion_rates[currency]
+        currency_symbol = symbols.get(currency, currency)
+        return f'{currency_symbol}{converted_price:.2f}'
+    
+    # Default to PHP if currency not found
+    currency_symbol = symbols.get(currency, 'PHP')
+    return f'{currency_symbol}{value:.2f}'
 
 
 def product_create_or_edit(request, ProductId=None):
@@ -126,3 +188,6 @@ def delete_product(request, product_id):
     messages.success(request, f'Product "{product_name}" has been successfully deleted.')
     return redirect('product_list')
 
+def product_status_view(request):
+    products = Product.objects.all()
+    return render(request, 'product_list.html', {'products': products})

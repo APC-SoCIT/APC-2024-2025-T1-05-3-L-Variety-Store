@@ -28,11 +28,14 @@ class Product(models.Model):
     ProductDescription = models.TextField()
     ProductQuantity = models.PositiveIntegerField()
     ProductType = models.CharField(max_length=100)
+    ProductStatus =models.BooleanField(default=False)
     ProductPrice = models.DecimalField(max_digits=10, decimal_places=2)
     ProductBarcode = models.CharField(max_length=50, unique=True, blank=True)
     BarcodeImage = models.ImageField(upload_to='barcodes/', blank=True, null=True)
     ProductImage = models.ImageField(upload_to='product_images/', blank=True, null=True)
     Suppliers = models.ManyToManyField('Supplier', blank=True)
+    
+    
 
     def generate_barcode(self):
         """
