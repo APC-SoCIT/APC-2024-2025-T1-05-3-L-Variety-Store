@@ -6,6 +6,8 @@ from .forms import UserCreationFormWithRole
 from .models import Employee, Role
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 # Import from your own forms.py
 
 def login_view(request):
@@ -47,6 +49,11 @@ def register_view(request):
 # Admin check decorator
 def is_admin(user):
     return user.is_staff  # Check if the user is an admin (is_staff or is_superuser)
+
+@user_passes_test(is_admin)
+def redirect_to_admin(request):
+    admin_url = reverse('admin:index')
+    return HttpResponseRedirect(admin_url)
 
 @user_passes_test(is_admin)
 def assign_role(request, user_id):

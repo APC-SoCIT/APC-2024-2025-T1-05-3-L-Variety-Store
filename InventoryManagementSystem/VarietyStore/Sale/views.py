@@ -4,14 +4,17 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Product, Order, SaleItem
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
 @login_required
 def create_order(request):
-    # Check if the user is a cashier
-    if not request.user.groups.filter(name='Cashiers').exists():
-        return JsonResponse({'error': 'You do not have permission to access this feature.'})
+    # Check if the user is part of the 'Inventory Staff' group
+    if not request.user.groups.filter(name='Inventory Staff').exists():
+        messages.error(request, "You do not have permission to access this feature.")
+        # Redirect back to the referring page (or home if not available)
+        return redirect(request.META.get('HTTP_REFERER', '/'))
 
     if request.method == 'POST':
         # Step 1: Adding products via barcode

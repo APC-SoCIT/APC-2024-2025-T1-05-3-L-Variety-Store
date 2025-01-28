@@ -35,6 +35,6 @@ class RegisterForm(forms.ModelForm):
             user.save()
 
             # Assign default role (e.g., "Customer")
-            default_role, _ = Role.objects.get_or_create(name="Customer")
+            default_role, _ = Role.objects.get_or_create(name="Customers")
             Employee.objects.create(user=user, role=default_role)
         return user

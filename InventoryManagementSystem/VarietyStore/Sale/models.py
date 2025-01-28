@@ -25,15 +25,15 @@ class Order(models.Model):
     CashierID = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
-    # Ensure ShippingAddress is provided for Online orders
-        if self.OrderType == 'Online' and not self.ShippingAddress:
-            raise ValueError("Shipping Address is required for Online orders.")
+    # Save the instance first to generate a primary key
+        if not self.pk:
+            super().save(*args, **kwargs)
     
-    # Calculate the total amount from the sale items before saving
+    # Calculate the total_amount after the instance has a primary key
         total_amount = sum(item.total_price() for item in self.items.all()) - self.Discount
-        self.TotalAmount = total_amount  # Apply discount
-    
-    # Do not modify `id`, let Django handle it
+        self.TotalAmount = max(total_amount, 0)  # Ensure it doesn't go below 0
+
+    # Save again to update the total_amount
         super().save(*args, **kwargs)
 
 

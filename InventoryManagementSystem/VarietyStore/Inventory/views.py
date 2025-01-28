@@ -4,10 +4,10 @@ from .forms import ProductForm, SupplierForm
 from .models import Supplier
 from django.contrib import messages
 from barcode.writer import ImageWriter
-
+from django.http import JsonResponse
 from decimal import Decimal
 from django import template
-
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -15,8 +15,14 @@ from django import template
 
 
 # Updated product_list view
-
+@login_required
 def product_list(request):
+    # Check if the user is part of the 'Inventory Staff' group
+    if not request.user.groups.filter(name='Inventory Staff').exists():
+        messages.error(request, "You do not have permission to access this feature.")
+        # Redirect back to the referring page (or home if not available)
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+    
     products = Product.objects.all()
     
     # Update active status based on stock and save changes to the database
