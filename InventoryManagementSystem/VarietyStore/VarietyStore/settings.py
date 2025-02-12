@@ -33,6 +33,7 @@ LOGIN_URL = '/admin/login/'
 # Application definition
 
 INSTALLED_APPS = [
+    'bootstrap5',
     'Sale',
     'website',
     'accounts',
