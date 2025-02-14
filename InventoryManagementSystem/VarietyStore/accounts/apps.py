@@ -11,7 +11,7 @@ class AccountsConfig(AppConfig):
 
         # Ensure groups exist after migrations
         def create_default_groups(sender, **kwargs):
-            groups = ['Customers', 'Managers', 'Inventory Staff']  # Add any other groups you need
+            groups = ['Customers', 'Cashier', 'Inventory Manager']  # Add any other groups you need
             for group_name in groups:
                 try:
                     Group.objects.get_or_create(name=group_name)

@@ -34,7 +34,7 @@ LOGIN_URL = '/admin/login/'
 
 INSTALLED_APPS = [
     'bootstrap5',
-    'Sale',
+
     'website',
     'accounts',
     'Inventory',
