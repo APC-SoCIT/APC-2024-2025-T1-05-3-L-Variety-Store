@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
-from .forms import UserCreationFormWithRole
-from .models import Employee, Role
+from .models import Role, UserProfile
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+from .forms import UserRegistrationForm
+
+
 # Import from your own forms.py
 
 def login_view(request):
@@ -30,41 +34,38 @@ def home(request):
 
 def register_view(request):
     if request.method == 'POST':
-        form = UserCreationFormWithRole(request.POST)
+        form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()  # Save the user and assign them to the 'Customer' group
-            messages.success(request, 'Your account has been created successfully.')
-            login(request, user)  # Log in the user after registration
-            return redirect('home')  # Redirect to home or any other page after successful registration
+            user = form.save()
+            messages.success(request, "Your account has been created successfully.")
+            login(request, user)
+            return redirect('home')
         else:
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, "Please correct the errors below.")
     else:
-        form = UserCreationFormWithRole()
+        form = UserRegistrationForm()
 
-    return render(request, 'accounts/register.html', {'form': form})
+    return render(request, 'accounts/signup.html', {'form': form})
 
 
-# Admin check decorator
 def is_admin(user):
-    return user.is_staff  # Check if the user is an admin (is_staff or is_superuser)
+    return user.is_superuser
 
-@user_passes_test(is_admin)
-def assign_role(request, user_id):
-    user = User.objects.get(id=user_id)
-    roles = Role.objects.all()
 
-    if request.method == 'POST':
-        role_id = request.POST.get('role_id')
+def manage_roles(request):
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        role_id = request.POST.get("role_id")
+
+        user = User.objects.get(id=user_id)
         role = Role.objects.get(id=role_id)
 
-        # Assign the role to the user (creating or updating the Employee record)
-        employee, created = Employee.objects.get_or_create(user=user)
-        employee.role = role
-        employee.save()
+        user_profile, _ = UserProfile.objects.get_or_create(user=user)
+        user_profile.role = role
+        user_profile.save()
 
-        return redirect('success_url')  # Replace with the actual redirect URL
+        return redirect("/accounts/manage_roles/") 
 
-    return render(request, 'accounts/assign_role.html', {'user': user, 'roles': roles})
-
-from django.http import HttpResponseForbidden
-
+    users = User.objects.all()
+    roles = Role.objects.all()
+    return render(request, "accounts/manage_roles.html", {"users": users, "roles": roles})

@@ -33,6 +33,9 @@ LOGIN_URL = '/admin/login/'
 # Application definition
 
 INSTALLED_APPS = [
+    'bootstrap5',
+
+    'website',
     'accounts',
     'Inventory',
     'django.contrib.admin',
@@ -44,7 +47,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'accounts.middleware.RoleBasedAccessMiddleware',
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,10 +84,15 @@ WSGI_APPLICATION = 'VarietyStore.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'varietystore',            # Name of the PostgreSQL database you created
+        'USER': 'postgres',          # Your PostgreSQL username
+        'PASSWORD': 'postgre',         # Your PostgreSQL password
+        'HOST': 'localhost',              # The host where PostgreSQL is running (usually localhost)
+        'PORT': '5432',                   # Default PostgreSQL port
     }
 }
+
 
 
 # Password validation

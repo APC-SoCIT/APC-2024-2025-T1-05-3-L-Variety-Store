@@ -21,6 +21,7 @@ class ProductForm(forms.ModelForm):
             'ProductImage',
             'Suppliers',
             'ProductBarcode',
+            'ProductStatus',
         ]
 
 class SupplierForm(forms.ModelForm):
