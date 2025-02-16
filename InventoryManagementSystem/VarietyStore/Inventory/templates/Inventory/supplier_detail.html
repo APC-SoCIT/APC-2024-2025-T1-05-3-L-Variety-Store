@@ -25,12 +25,12 @@
             </div>
             <div class="card-footer d-flex justify-content-between">
                 <div>
-                    <a href="{% url 'supplier_list' %}" class="btn btn-secondary">Back to Supplier List</a>
-                    <a href="{% url 'product_list' %}" class="btn btn-info">Back to Product List</a>
+                    <a href="{% url 'inventory:supplier_list' %}" class="btn btn-secondary">Back to Supplier List</a>
+                    <a href="{% url 'inventory:product_list' %}" class="btn btn-info">Back to Product List</a>
                 </div>
                 <div>
-                    <a href="{% url 'update_supplier' supplier.SupplierId %}" class="btn btn-warning">Edit</a>
-                    <a href="{% url 'delete_supplier' supplier.SupplierId %}" class="btn btn-danger" 
+                    <a href="{% url 'inventory:update_supplier' supplier.SupplierId %}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'inventory:delete_supplier' supplier.SupplierId %}" class="btn btn-danger" 
                        onclick="return confirm('Are you sure you want to delete this supplier?');">Delete</a>
                 </div>
             </div>

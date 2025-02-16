@@ -1,18 +1,46 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product
+from .models import Product, Supplier
 from .forms import ProductForm, SupplierForm
-from .models import Supplier
 from django.contrib import messages
-from barcode.writer import ImageWriter
-from django.http import JsonResponse
-from decimal import Decimal
-from django import template
 from django.contrib.auth.decorators import login_required
+from decimal import Decimal
 
+def format_price(value, currency='PHP'):
+    if value is None:
+        return f'0.00 {currency}'
+    
+    try:
+        value = Decimal(value)
+    except (ValueError, TypeError):
+        return f'{value} {currency}'
+    
+    # Currency symbols and conversion rates
+    symbols = {
+        'USD': '$',
+        'PHP': '₱',
+        'EUR': '€',
+        'JPY': '¥',
+        'GBP': '£',
+    }
+    conversion_rates = {
+        'USD': Decimal('1.0'),
+        'EUR': Decimal('0.85'),
+        'JPY': Decimal('110.0'),
+        'GBP': Decimal('0.75'),
+        'PHP': Decimal('50.0'),
+    }
 
-# Updated product_list view
+    if currency in conversion_rates:
+        converted_price = value / conversion_rates['PHP'] * conversion_rates[currency]
+        currency_symbol = symbols.get(currency, currency)
+        return f'{currency_symbol}{converted_price:.2f}'
+    
+    # Default to PHP if currency not found
+    currency_symbol = symbols.get(currency, 'PHP')
+    return f'{currency_symbol}{value:.2f}'
+
 @login_required
-def product_list(request):  
+def product_list(request):
     products = Product.objects.all()
     
     # Update active status based on stock and save changes to the database
@@ -54,7 +82,7 @@ def product_list(request):
     for product in products:
         formatted_price = format_price(product.ProductPrice, currency)
         formatted_products.append({
-            'id': product.ProductId,
+            'ProductId': product.ProductId,  # Ensure ProductId is included
             'image': product.ProductImage.url if product.ProductImage else None,
             'name': product.ProductName,
             'type': product.ProductType,
@@ -72,44 +100,7 @@ def product_list(request):
         'product_types': used_product_types,  # Pass the list of used product types
     })
 
-
-    
-
-def format_price(value, currency='PHP'):
-    if value is None:
-        return f'0.00 {currency}'
-    
-    try:
-        value = Decimal(value)
-    except (ValueError, TypeError):
-        return f'{value} {currency}'
-    
-    # Currency symbols and conversion rates
-    symbols = {
-        'USD': '$',
-        'PHP': '₱',
-        'EUR': '€',
-        'JPY': '¥',
-        'GBP': '£',
-    }
-    conversion_rates = {
-        'USD': Decimal('1.0'),
-        'EUR': Decimal('0.85'),
-        'JPY': Decimal('110.0'),
-        'GBP': Decimal('0.75'),
-        'PHP': Decimal('50.0'),
-    }
-
-    if currency in conversion_rates:
-        converted_price = value / conversion_rates['PHP'] * conversion_rates[currency]
-        currency_symbol = symbols.get(currency, currency)
-        return f'{currency_symbol}{converted_price:.2f}'
-    
-    # Default to PHP if currency not found
-    currency_symbol = symbols.get(currency, 'PHP')
-    return f'{currency_symbol}{value:.2f}'
-
-
+@login_required
 def product_create_or_edit(request, ProductId=None):
     # If ProductId is provided, fetch the product for editing
     product = None
@@ -121,7 +112,7 @@ def product_create_or_edit(request, ProductId=None):
         form = ProductForm(request.POST, request.FILES, instance=product)  # Pass the existing product for editing
         if form.is_valid():
             form.save()  # Save the new or updated product
-            return redirect('product_list')  # Redirect to the product list after saving
+            return redirect('inventory:product_list')  # Redirect to the product list after saving
     else:
         form = ProductForm(instance=product)  # Initialize the form with existing product data (if editing)
     
@@ -137,53 +128,64 @@ def product_create_or_edit(request, ProductId=None):
         'product': product,
         'product_form_title': form_title,
     })
-    
+
+@login_required
 def create_supplier(request):
     if request.method == 'POST':
         form = SupplierForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('supplier_list')  # Replace with the appropriate URL
+            return redirect('inventory:supplier_list')  # Replace with the appropriate URL
     else:
         form = SupplierForm()
 
     return render(request, 'inventory/create_supplier.html', {'form': form})
 
+@login_required
 def supplier_list(request):
-    suppliers = Supplier.objects.all()  # Fetch all suppliers
+    search_query = request.GET.get('search', '')
+    suppliers = Supplier.objects.all()
+
+    if search_query:
+        suppliers = suppliers.filter(FirstName__icontains=search_query) | suppliers.filter(LastName__icontains=search_query)
+
     return render(request, 'inventory/supplier_list.html', {'suppliers': suppliers})
 
+@login_required
 def update_supplier(request, pk):
     supplier = get_object_or_404(Supplier, pk=pk)
     if request.method == "POST":
         form = SupplierForm(request.POST, instance=supplier)
         if form.is_valid():
             form.save()
-            return redirect('supplier_list')
+            return redirect('inventory:supplier_list')
     else:
         form = SupplierForm(instance=supplier)
     return render(request, 'inventory/update_supplier.html', {'form': form})
 
+@login_required
 def delete_supplier(request, pk):
     supplier = get_object_or_404(Supplier, pk=pk)
     if request.method == "POST":
         supplier.delete()
-        return redirect('supplier_list')
+        return redirect('inventory:supplier_list')
     return render(request, 'inventory/delete_supplier.html', {'supplier': supplier})
 
+@login_required
 def supplier_detail(request, supplier_id):
     supplier = get_object_or_404(Supplier, SupplierId=supplier_id)
     return render(request, 'inventory/supplier_detail.html', {'supplier': supplier})
 
-
+@login_required
 def delete_product(request, product_id):
     """Handle deleting a product."""
     product = get_object_or_404(Product, ProductId=product_id)
     product_name = product.ProductName  # Corrected field name
     product.delete()
     messages.success(request, f'Product "{product_name}" has been successfully deleted.')
-    return redirect('product_list')
+    return redirect('inventory:product_list')
 
+@login_required
 def product_status_view(request):
     products = Product.objects.all()
-    return render(request, 'product_list.html', {'products': products})
+    return render(request, 'inventory/product_list.html', {'products': products})

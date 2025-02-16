@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 
-
 # Role Model linked to Django Groups
 class Role(models.Model):
     name = models.CharField(max_length=150, unique=True)
@@ -15,6 +14,8 @@ class Role(models.Model):
 # Extending User with UserProfile
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
