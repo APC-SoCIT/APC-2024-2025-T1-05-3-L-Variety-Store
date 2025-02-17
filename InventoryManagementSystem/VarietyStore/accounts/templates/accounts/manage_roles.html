@@ -1,0 +1,50 @@
+<!-- filepath: /d:/abc123/APC-2024-2025-T1-05-3-L-Variety-Store/InventoryManagementSystem/VarietyStore/accounts/templates/accounts/manage_roles.html -->
+{% extends "Inventory/base.html" %}
+
+{% block title %}Manage Accounts{% endblock %}
+
+{% block header %}Accounts{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Accounts</h2>
+        <a href="{% url 'accounts:create_user' %}" class="btn btn-success">
+            <i class="fas fa-user-plus"></i> Create New Account
+        </a>
+    </div>
+
+    <h2 class="mt-5">Accounts</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><a href="{% url 'accounts:edit_user' user.id %}">{{ user.username }}</a></td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.profile.role %}
+                        {{ user.profile.role.name }}
+                    {% else %}
+                        No Role
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{% url 'accounts:reset_password' user.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning">Reset Password</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

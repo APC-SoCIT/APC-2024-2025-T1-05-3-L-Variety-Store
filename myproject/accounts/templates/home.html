@@ -1,10 +1,112 @@
 <!DOCTYPE html>
-{% if user.is_authenticated %}
-    <meta http-equiv="refresh" content="0; url=/home.html">
-{% else %}
-    <meta http-equiv="refresh" content="0; url=/login.html">
-{% endif %}
 <html lang="en">
+    {% load static %}
+
+    <style>
+        /* Reset some default styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Set a background color and font family */
+        body {
+            background-color: #f8f8f8;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        
+        /* Styling for the header */
+        header {
+            background-color: #4CAF50;
+            padding: 20px 0;
+            color: white;
+            text-align: center;
+        }
+        
+        /* Navbar styling */
+        .navbar h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .navbar nav ul {
+            list-style-type: none;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .navbar nav ul li {
+            display: inline;
+        }
+        
+        .navbar nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        
+        .navbar nav ul li a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Main section styling */
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60vh;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        /* Welcome section */
+        .welcome-section h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-section p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Order button styling */
+        .order-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            color: white;
+            background-color: #4CAF50;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .order-button:hover {
+            background-color: #45a049;
+        }
+        
+        /* Make the page responsive */
+        @media screen and (max-width: 768px) {
+            .navbar h1 {
+                font-size: 1.8rem;
+            }
+        
+            .navbar nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+        
+            .order-button {
+                width: 100%;
+                padding: 12px;
+            }
+        }
+        
+    </style>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +114,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    {% if user.is_authenticated %}
     <header>
         <div class="navbar">
             <h1>3-L Variety Store and Frozen Goods</h1>
@@ -20,15 +123,39 @@
                     <li><a href="#products">Products</a></li>
                     <li><a href="#order-online">Order Online</a></li>
                     <li><a href="#reservation">Reservation</a></li>
-                    <li><a href="#logout">Log out</a></li>
+                    <li><a href="{% url 'accounts:logout' %}">Logout</a></li>
                 </ul>
             </nav>
         </div>
     </header>
     <main>
-        <h2>WELCOME USER</h2>
-        <p>are you ready to order?</p>
-        <a href="#order" class="order-button">ORDER NOW</a>
+        <div class="welcome-section">
+            <h2>WELCOME USER</h2>
+            <p>Are you ready to order?</p>
+            <a href="#order" class="order-button">ORDER NOW</a>
+        </div>
     </main>
+    {% else %}
+    <header>
+        <div class="navbar">
+            <h1>3-L Variety Store and Frozen Goods</h1>
+            <nav>
+                <ul>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#order-online">Order Online</a></li>
+                    <li><a href="#reservation">Reservation</a></li>
+                    <li><a href="{% url 'accounts:login' %}">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="welcome-section">
+            <h2>You need to sign in</h2>
+            <p>Are you ready to order?</p>
+            <a href="#order" class="order-button">ORDER NOW</a>
+        </div>
+    </main>
+    {% endif %}
 </body>
 </html>
