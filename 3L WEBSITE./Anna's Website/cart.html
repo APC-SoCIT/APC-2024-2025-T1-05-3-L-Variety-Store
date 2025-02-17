@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - 3-L Variety Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="cart.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html">
+                <img src="image/new_logo1.png" alt="Fresh Hub Logo" class="logo">
+            </a>
+            <input type="search" class="search-bar" placeholder="Search for products...">
+            <div class="header-links">
+                <a href="#">Recipes</a>
+                <a href="#">Blog</a>
+                <a href="#">Franchise</a>
+                <a href="#">FAQ</a>
+                <a href="#">Stores</a>
+                <a href="#">Contact Us</a>
+                <a href="login.html">My Account</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="index.html">Home</a></li>
+            <li class="nav-item"><a href="#">Pork</a></li>
+            <li class="nav-item"><a href="#">Chicken</a></li>
+            <li class="nav-item"><a href="#">Beef</a></li>
+            <li class="nav-item"><a href="#">Ready To Cook</a></li>
+            <li class="nav-item"><a href="#">Seafood</a></li>
+            <li class="nav-item"><a href="#">Eggs</a></li>
+            <li class="nav-item"><a href="#">Others</a></li>
+            <li class="nav-item"><a href="#">Sale</a></li>
+            <li class="nav-item"><a href="#">Gift Card</a></li>
+            <li class="nav-item"><a href="cart.html" class="active">Cart</a></li>
+        </ul>
+    </nav>
+
+    <!-- Cart Section -->
+    <section class="cart-section">
+        <div class="cart-container">
+            <h2>CHECKOUT</h2>
+            <div class="cart-content">
+                <div class="cart-items">
+                    <h3>IN YOUR BAG</h3>
+                    <div id="cart-items"></div>
+                    <p id="empty-message" style="display: none;">Your cart is currently empty.</p>
+                </div>
+                <div class="cart-totals">
+                    <h3>CART TOTALS</h3>
+                    <div class="totals">
+                        <div class="total-item">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">₱0.00</span>
+                        </div>
+                        <div class="total-item">
+                            <span>Shipping:</span>
+                            <span>₱150.00</span>
+                        </div>
+                        <div class="total-item total">
+                            <span>Total:</span>
+                            <span id="total">₱0.00</span>
+                        </div>
+                    </div>
+                    <button class="checkout-button" onclick="window.open('checkout.html', '_blank')">Proceed to Checkout</button>
+                </div>
+            </div>
+            <a href="index.html" class="return-button">Return to shop</a>
+        </div>
+    </section>
+
+    <script>
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const cartItemsContainer = document.getElementById('cart-items');
+        const emptyMessage = document.getElementById('empty-message');
+        const subtotalElement = document.getElementById('subtotal');
+        const totalElement = document.getElementById('total');
+
+        function updateCart() {
+            cartItemsContainer.innerHTML = '';
+            let subtotal = 0;
+
+            if (cart.length > 0) {
+                emptyMessage.style.display = 'none';
+                cart.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('cart-item');
+                    itemElement.innerHTML = `
+                        <div class="product-info">
+                            <h4>${item.name}</h4>
+                            <p class="weight">Weight: ${item.weight}g</p>
+                            <p class="price">Price: ₱${parseFloat(item.price).toFixed(2)}</p>
+                            <div class="quantity">
+                                <button class="decrease" onclick="updateQuantity(${index}, -1)">-</button>
+                                <span>${item.quantity}</span>
+                                <button class="increase" onclick="updateQuantity(${index}, 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="subtotal">
+                            ₱${(item.price * item.quantity).toFixed(2)}
+                        </div>
+                        <button class="remove-item" onclick="removeItem(${index})">X</button>
+                    `;
+                    cartItemsContainer.appendChild(itemElement);
+                    
+                    // Calculate subtotal
+                    subtotal += item.price * item.quantity;
+                });
+                subtotalElement.textContent = `₱${subtotal.toFixed(2)}`;
+                totalElement.textContent = `₱${(subtotal + 150).toFixed(2)}`; // Add shipping fee
+            } else {
+                emptyMessage.style.display = 'block';
+            }
+        }
+
+        function updateQuantity(index, change) {
+            if (cart[index].quantity + change > 0) {
+                cart[index].quantity += change;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCart();
+            }
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+        }
+
+        // Initial cart display
+        updateCart();
+    </script>
+</body>
+</html> 
