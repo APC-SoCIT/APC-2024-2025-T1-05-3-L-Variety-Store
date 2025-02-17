@@ -1,63 +1,28 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import Product
-import json
+from django.shortcuts import render, redirect
+from .models import Product, Order
+from .forms import OrderForm
 
-@csrf_exempt
-def scan_barcode(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        barcodes = data.get('barcodes', [])  # Accepting multiple barcodes
+def home(request):
+    products = Product.objects.all()
+    return render(request, 'payments/home.html', {'products': products})
 
-        if not barcodes:
-            return JsonResponse({"success": False, "message": "No barcodes provided."})
-
-        scanned_products = []
-        errors = []
-        
-        for barcode in barcodes:
-            product = Product.objects.filter(barcode=barcode).first()
-
-            if not product:
-                errors.append(f"Product with barcode {barcode} not found.")
-                continue
-
-            if product.quantity <= 0:
-                errors.append(f"Product '{product.name}' (barcode: {barcode}) is out of stock.")
-                continue
-
-            # Deduct 1 item per scan
-            product.quantity -= 1
-            product.save()
-
-            scanned_products.append({
-                "name": product.name,
-                "barcode": product.barcode,
-                "remaining_quantity": product.quantity,
-                "price": float(product.price),
-            })
-
-        response_data = {
-            "success": True if scanned_products else False,
-            "scanned_products": scanned_products,
-            "errors": errors
-        }
-        return JsonResponse(response_data)
+def create_order(request):
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.total_price = order.quantity * order.product.price
+            order.payment_status = 'Pending'
+            order.save()
+            return redirect('process_payment', order_id=order.id)
     else:
-        return JsonResponse({"success": False, "message": "Invalid request method."})
-    
-    
-from django.shortcuts import render
+        form = OrderForm()
+    return render(request, 'payments/create_order.html', {'form': form})
 
-# View function for the storefront page
-def storefront_view(request):
-    # Any context data you want to pass to the template (e.g., product data)
-    context = {
-        'products': [
-            {'name': 'Product 1', 'price': 19.99},
-            {'name': 'Product 2', 'price': 29.99},
-            {'name': 'Product 3', 'price': 39.99},
-        ],
-    }
-    
-    return render(request, 'storefront.html', context)
+def process_payment(request, order_id):
+    order = Order.objects.get(id=order_id)
+    if request.method == 'POST':
+        order.payment_status = 'Paid'
+        order.save()
+        return redirect('home')
+    return render(request, 'payments/process_payment.html', {'order': order})
