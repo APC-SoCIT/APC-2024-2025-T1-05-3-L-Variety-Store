@@ -1,3 +1,9 @@
-from django.contrib import admin
-
-# Register your models here.
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'payments',  # Add the payments app
+]
