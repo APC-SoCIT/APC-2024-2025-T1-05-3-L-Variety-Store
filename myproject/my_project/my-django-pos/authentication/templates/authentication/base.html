@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Authentication{% endblock %}</title>
+    <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <h1 class="text-2xl font-bold">My POS System</h1>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer class="bg-white shadow mt-6">
+        <div class="max-w-7xl mx-auto px-4 py-4 text-center">
+            <p class="text-gray-600">© {{ current_year }} My POS System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

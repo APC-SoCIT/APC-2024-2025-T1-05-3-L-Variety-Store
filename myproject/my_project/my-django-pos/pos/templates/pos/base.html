@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+    <title>{% block title %}POS System{% endblock %}</title>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <h1 class="text-2xl font-bold">Point of Sale System</h1>
+            <nav class="mt-4">
+                <ul class="flex space-x-4">
+                    <li><a href="{% url 'pos:catalog' %}" class="text-blue-600 hover:underline">Catalog</a></li>
+                    <li><a href="{% url 'pos:cart' %}" class="text-blue-600 hover:underline">Cart</a></li>
+                    <li><a href="{% url 'pos:payment' %}" class="text-blue-600 hover:underline">Payment</a></li>
+                    <li><a href="{% url 'pos:receipt' %}" class="text-blue-600 hover:underline">Receipt</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer class="bg-white shadow mt-6">
+        <div class="max-w-7xl mx-auto px-4 py-4 text-center">
+            <p class="text-gray-600">© {{ current_year }} Point of Sale System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
