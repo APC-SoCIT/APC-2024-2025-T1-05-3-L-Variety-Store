@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 from accounts import views
 
 urlpatterns = [
+    path('sales/', include('Sales.urls')),
     path('admin/', admin.site.urls),
     path('Inventory/', include('Inventory.urls')),
     path('', views.home, name='home'),

@@ -1,0 +1,68 @@
+<!-- filepath: /d:/abc123/APC-2024-2025-T1-05-3-L-Variety-Store/InventoryManagementSystem/VarietyStore/website/templates/website/homepage.html -->
+{% extends "website/base.html" %}
+{% load static %}
+
+{% block title %}3-L Variety Store{% endblock %}
+
+{% block content %}
+<body>
+<!-- Category Icons Section -->
+<section class="category-section">
+    <div class="category-container">
+        {% for category in category_list %}
+        <div class="category-item">
+            <div class="category-icon">
+                <img src="{% static category.image %}" alt="{{ category.name }}">
+            </div>
+            <div class="category-text">{{ category.name }}</div>
+            <div class="items-count">{{ category.count }} items</div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="new-items">
+    <h2>Products</h2>
+    {% for category, products in categorized_products.items %}
+    <div class="category-products">
+        <!-- Category Header -->
+        <h3 class="category-header">{{ category }}</h3>
+        
+        <!-- Product Cards -->
+        <div class="product-cards">
+            {% for product in products %}
+            <div class="product-card">
+                {% if product.product_image %}
+                <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}">
+                {% else %}
+                <img src="{% static 'website/images/default-product.jpg' %}" alt="No Image">
+                {% endif %}
+                <div class="product-label green">{{ product.product_name|upper }}</div>
+                <h3>{{ product.product_name }}</h3>
+                <div class="stock-status">
+                    {% if product.product_quantity > 0 %}
+                    <span class="in-stock">✓ In Stock</span>
+                    {% else %}
+                    <span class="out-of-stock">Out of Stock</span>
+                    {% endif %}
+                </div>
+                <p class="price">₱{{ product.product_price }}</p>
+                <div class="quantity-control">
+                    <button class="qty-btn minus">-</button>
+                    <input type="number" value="1" min="1" class="quantity-input">
+                    <button class="qty-btn plus">+</button>
+                </div>
+                <form method="post" action="{% url 'website:add_to_cart' product.product_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="1" class="quantity-input">
+                    <button type="submit" class="add-to-cart" data-id="{{ product.product_id }}" data-name="{{ product.product_name }}" data-price="{{ product.product_price }}" data-weight="{{ product.weight }}">
+                        Add to cart
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}

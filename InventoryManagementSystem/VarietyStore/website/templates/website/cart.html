@@ -1,0 +1,59 @@
+<!-- filepath: /d:/abc123/APC-2024-2025-T1-05-3-L-Variety-Store/InventoryManagementSystem/VarietyStore/website/templates/website/cart.html -->
+{% extends "website/base.html" %}
+{% load static %}
+{% load cart_extras %}
+
+{% block title %}Your Cart - 3-L Variety Store{% endblock %}
+{% block content %}
+<section class="cart-section">
+    <div class="cart-container">
+        <h2>Your Cart</h2>
+        {% if cart and cart.items.exists %}
+        <div id="cart-items">
+            {% for item in cart.items.all %}
+            <div class="cart-item">
+                <div class="product-info">
+                    <h3>{{ item.product.product_name }}</h3>
+                    <p>Weight: {{ item.product.weight }}g</p>
+                    <p>Price: ₱{{ item.product.product_price }}</p>
+                    <div class="quantity">
+                        <span>{{ item.quantity }}</span>
+                    </div>
+                </div>
+                <div class="subtotal">
+                    ₱{{ item.product.product_price|floatformat:2 }}
+                </div>
+                <form method="post" action="{% url 'website:remove_from_cart' item.product.product_id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="remove-from-cart" data-id="{{ item.product.product_id }}">
+                        Remove from cart
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="cart-totals">
+            <h3>Cart Totals</h3>
+            <div class="totals">
+                <div class="total-item">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">₱{{ cart.items.all|cart_total }}</span>
+                </div>
+                <div class="total-item">
+                    <span>Shipping:</span>
+                    <span>₱150.00</span>
+                </div>
+                <div class="total-item total">
+                    <span>Total:</span>
+                    <span id="total">₱{{ cart.items.all|cart_total|add:150 }}</span>
+                </div>
+            </div>
+            <a href="{% url 'website:homepage' %}" class="return-button">Return to shop</a>
+            <button class="checkout-button">Proceed to Checkout</button>
+        </div>
+        {% else %}
+        <p id="empty-message">Your cart is currently empty.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

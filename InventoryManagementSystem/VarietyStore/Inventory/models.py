@@ -24,17 +24,14 @@ class Supplier(models.Model):
 # Inventory Model
 class Product(models.Model):
     CATEGORY_CHOICES = [
-        ('Beverages', 'Beverages'),
-        ('Bread/Bakery', 'Bread/Bakery'),
-        ('Canned Goods', 'Canned Goods'),
-        ('Dairy', 'Dairy'),
-        ('Dry Goods', 'Dry Goods'),
-        ('Meat', 'Meat'),
-        ('Produce', 'Produce'),
-        ('Snacks', 'Snacks'),
+        ('Pork', 'Pork'),
+        ('Chicken', 'Chicken'),
+        ('Beef', 'Beef'),
+        ('Seafood', 'Seafood'),
+        ('Ready To Cook', 'Ready To Cook'),
+        ('Eggs', 'Eggs'),
         ('Others', 'Others'),
     ]
-
     product_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=200)
     product_description = models.TextField()

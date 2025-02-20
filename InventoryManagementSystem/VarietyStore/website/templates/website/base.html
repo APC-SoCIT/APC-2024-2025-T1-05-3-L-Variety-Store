@@ -1,0 +1,104 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}3-L Variety Store{% endblock %}</title>
+    <!-- Global CSS files -->
+    <link rel="stylesheet" href="{% static 'website/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'website/css/cart.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-content">
+            <a href="{% url 'website:homepage' %}">
+                <img src="{% static 'website/image/new_logo1.png' %}" alt="Fresh Hub Logo" class="logo">
+            </a>
+            <input type="search" class="search-bar" placeholder="Search for products...">
+            <div class="header-links">
+                <a href="#">Recipes</a>
+                <a href="#">Blog</a>
+                <a href="#">Franchise</a>
+                <a href="#">FAQ</a>
+                <a href="#">Stores</a>
+                <a href="#">Contact Us</a>
+                <a href="{% url 'accounts:login' %}">My Account</a>
+                <div class="cart-summary">
+                    <a href="{% url 'website:cart' %}">
+                        <img src="{% static 'website/images/cart-icon.png' %}" alt="Cart">
+                        <span id="cart-count" class="cart-counter">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <!-- Navigation items -->
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About 3-L Variety Store</h3>
+                <p>3-L Variety Store provides and delivers premium quality meats and frozen products</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Delivery Information</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: info@3lvarietystore.com</p>
+                <p>Phone: 0967 315 8034</p>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/3LFrozenGoodsOrmoc" target="_blank" rel="noopener noreferrer">
+                        <img src="{% static 'website/image/facebook-icon.png' %}" alt="Facebook">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 3-L Variety Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Cookie Notice -->
+    <div class="cookie-notice">
+        We use cookies to ensure you get the best experience while browsing our site. By continued use, you agree 
+        to our privacy statement and accept our use of such cookies.
+        <button onclick="acceptCookies()">OK</button>
+        <button onclick="viewPrivacyStatement()">Privacy Statement</button>
+    </div>
+
+    <script>
+        function acceptCookies() {
+            document.querySelector('.cookie-notice').style.display = 'none';
+        }
+        function viewPrivacyStatement() {
+            // Add privacy statement logic here (e.g., show a modal or redirect)
+        }
+    </script>
+
+    <!-- Global JS files -->
+    {% block extrascripts %}
+    <script src="{% static 'website/js/script.js' %}"></script>
+    {% endblock %}
+</body>
+</html>

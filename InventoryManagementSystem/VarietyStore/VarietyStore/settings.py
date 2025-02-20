@@ -35,6 +35,7 @@ LOGIN_URL = '/admin/login/'
 INSTALLED_APPS = [
     'widget_tweaks',
     'django_bootstrap5',
+    'Sales',
     'website',
     'accounts',
     'Inventory',

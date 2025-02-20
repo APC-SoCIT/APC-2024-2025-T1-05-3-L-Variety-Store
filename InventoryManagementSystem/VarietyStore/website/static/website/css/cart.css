@@ -1,0 +1,142 @@
+/* cart.css */
+
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa; /* Light background for contrast */
+    color: #333; /* Dark text for readability */
+}
+
+/* Cart Section */
+.cart-section {
+    padding: 20px;
+}
+
+.cart-container {
+    max-width: 800px;
+    margin: auto;
+    background: white; /* White background for the cart */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    padding: 20px;
+}
+
+/* Cart Item Styles */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.product-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-info h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.product-info p {
+    margin: 5px 0;
+}
+
+/* Quantity Controls */
+.quantity {
+    display: flex;
+    align-items: center;
+}
+
+.quantity button {
+    background-color: #007bff; /* Blue color */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.quantity button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Subtotal */
+.subtotal {
+    font-weight: bold;
+}
+
+/* Cart Totals */
+.cart-totals {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px; /* Rounded corners */
+    background-color: #f1f1f1; /* Light gray background */
+}
+
+.totals {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.total-item {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Checkout Button */
+.checkout-button {
+    background-color: #28a745; /* Green color for checkout button */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%; /* Full width */
+}
+
+.checkout-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Return Button */
+.return-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #007bff; /* Blue color */
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    text-align: center; /* Center text */
+}
+
+.return-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Empty Cart Message */
+#empty-message {
+    text-align: center;
+    font-size: 1.2em;
+    color: #888; /* Gray color for empty message */
+}
+.cart-summary {
+    position: relative;
+    display: inline-block;
+}
+.cart-counter {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+}
