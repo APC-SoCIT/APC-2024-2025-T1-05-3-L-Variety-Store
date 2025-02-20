@@ -29,7 +29,7 @@ def remove_from_cart(request, product_id):
         del cart[product_id]
     request.session['cart'] = cart
     return redirect('cart')
-
+#diko mahanap error tim
 @login_required
 def payment(request):
     if request.method == 'POST':
