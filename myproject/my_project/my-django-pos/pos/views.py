@@ -48,6 +48,7 @@ def payment(request):
         form = PaymentForm()
     return render(request, 'pos/payment.html', {'form': form})
 
+#Updated Reciept
 @login_required
 def receipt(request, transaction_id):
     transaction = Transaction.objects.get(id=transaction_id)
