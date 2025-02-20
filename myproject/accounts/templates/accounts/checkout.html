@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - 3-L Variety Store</title>
+    <link rel="stylesheet" href="style.css"> <!-- Main styles -->
+    <link rel="stylesheet" href="checkout.css"> <!-- Checkout specific styles -->
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html">
+                <img src="image/new_logo1.png" alt="Fresh Hub Logo" class="logo">
+            </a>
+            <input type="search" class="search-bar" placeholder="Search for products...">
+            <div class="header-links">
+                <a href="#">Recipes</a>
+                <a href="#">Blog</a>
+                <a href="#">Franchise</a>
+                <a href="#">FAQ</a>
+                <a href="#">Stores</a>
+                <a href="#">Contact Us</a>
+                <a href="login.html">My Account</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="index.html">Home</a></li>
+            <li class="nav-item"><a href="#">Pork</a></li>
+            <li class="nav-item"><a href="#">Chicken</a></li>
+            <li class="nav-item"><a href="#">Beef</a></li>
+            <li class="nav-item"><a href="#">Ready To Cook</a></li>
+            <li class="nav-item"><a href="#">Seafood</a></li>
+            <li class="nav-item"><a href="#">Eggs</a></li>
+            <li class="nav-item"><a href="#">Others</a></li>
+            <li class="nav-item"><a href="#">Sale</a></li>
+            <li class="nav-item"><a href="#">Gift Card</a></li>
+            <li class="nav-item"><a href="cart.html" class="active">Cart</a></li>
+        </ul>
+    </nav>
+
+    <section class="checkout-section">
+        <div class="checkout-container">
+            <h2>CHECKOUT</h2>
+            <div class="delivery-options">
+                <h3>1. Delivery Options</h3>
+                <label>
+                    <input type="radio" name="delivery" value="ship" checked> Ship
+                </label>
+                <label>
+                    <input type="radio" name="delivery" value="pickup"> Pickup
+                </label>
+                <div class="address-form">
+                    <h4>Address Details</h4>
+                    <input type="text" placeholder="First Name" required>
+                    <input type="text" placeholder="Last Name" required>
+                    <input type="text" placeholder="Address" required>
+                    <input type="email" placeholder="Email" required>
+                    <input type="tel" placeholder="Phone Number" required>
+                </div>
+            </div>
+            <div class="payment-method">
+                <h3>2. Payment Method</h3>
+                <select>
+                    <option value="credit-card">Credit Card</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="bank-transfer">Bank Transfer</option>
+                </select>
+            </div>
+            <button class="confirm-button">Confirm and Pay</button>
+        </div>
+    </section>
+</body>
+</html> 

@@ -1,0 +1,121 @@
+body {
+    font-family: Arial, sans-serif; /* Ensure consistent font */
+    background-color: #f8d7da; /* Light pink background */
+    color: #721c24; /* Dark red text */
+    margin: 0;
+    padding: 0; /* Remove default padding */
+}
+
+.top-banner {
+    background-color: #000000; /* Darker red for the banner */
+    color: white; /* White text for contrast */
+    text-align: center; /* Center the text */
+    padding: 15px 0; /* Padding for the banner */
+    font-weight: bold; /* Make the text bold */
+}
+
+.header {
+    background-color: #dc3545; /* White background for header */
+    padding: 15px 0; /* Padding for header */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.header-content {
+    display: flex; /* Use flexbox for layout */
+    justify-content: space-between; /* Space between logo, search bar, and links */
+    align-items: center; /* Center items vertically */
+    max-width: 1200px; /* Center header content */
+    margin: 0 auto; /* Center the header */
+    padding: 0 20px; /* Padding for header */
+}
+
+.header-links a {
+    color: #fff; /* Dark red text for links */
+    margin: 0 15px; /* Space between links */
+    text-decoration: none; /* Remove underline */
+    font-weight: bold; /* Make links bold */
+}
+
+.header-links a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+.navbar {
+    background-color: white; /* Dark red background */
+    padding: 10px 0; /* Padding for the navbar */
+}
+
+.navbar ul {
+    list-style-type: none; /* Remove bullet points */
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    display: flex; /* Use flexbox for horizontal layout */
+    justify-content: center; /* Center the items */
+}
+
+.navbar li {
+    margin: 0 15px; /* Space between items */
+}
+
+.navbar a {
+    color: black; /* White text color */
+    text-decoration: none; /* Remove underline */
+    font-weight: bold; /* Make links bold */
+    transition: color 0.3s; /* Smooth transition for hover effect */
+}
+
+.navbar a:hover {
+    color: #f8d7da; /* Change color on hover */
+    text-decoration: underline; /* Underline on hover */
+}
+
+main {
+    padding: 20px; /* Add padding for spacing */
+    max-width: 800px; /* Limit width for better readability */
+    margin: 20px auto; /* Center the main content */
+    background-color: #fff; /* White background for main content */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+h1 {
+    font-size: 2.5em; /* Larger font size for the main heading */
+    text-align: center; /* Center the heading */
+    margin-bottom: 10px; /* Space below the heading */
+}
+
+h2 {
+    font-size: 1.8em; /* Subheading size */
+    text-align: center; /* Center the subheading */
+    margin-bottom: 15px; /* Space below the subheading */
+}
+
+p {
+    font-size: 1.1em; /* Slightly larger font for readability */
+    line-height: 1.6; /* Improve readability */
+    margin: 10px 0; /* Space between paragraphs */
+    text-align: justify; /* Justify text for better alignment */
+}
+
+.privacy-seal-container {
+    text-align: center; /* Center the seal */
+    margin: 20px 0; /* Space around the seal */
+}
+
+.privacy-notice {
+    text-align: center; /* Center the text */
+    margin: 20px 0; /* Add some vertical spacing */
+    font-style: italic; /* Italicize the notice for emphasis */
+}
+
+.footer {
+    text-align: center; /* Center footer text */
+    padding: 20px 0; /* Padding for footer */
+    background-color: #fff; /* White background for footer */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.footer-content {
+    max-width: 1200px; /* Center footer content */
+    margin: 0 auto; /* Center the footer */
+}

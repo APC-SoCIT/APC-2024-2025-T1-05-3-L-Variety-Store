@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - 3-L Variety Store</title>
+    <link rel="stylesheet" href="style.css"> <!-- Main styles -->
+    <link rel="stylesheet" href="dashboard.css"> <!-- Dashboard specific styles -->
+    <style>
+        /* Additional styles for tabbed content */
+        .tab-content {
+            display: none; /* Hide all tab content by default */
+            margin-top: 20px;
+        }
+        .active {
+            display: block; /* Show active tab content */
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html">
+                <img src="image/new_logo1.png" alt="Fresh Hub Logo" class="logo">
+            </a>
+            <div class="search-container">
+                <input type="search" class="search-bar" placeholder="Search for products...">
+            </div>
+            <div class="header-links">
+                <a href="#">Recipes</a>
+                <a href="#">Blog</a>
+                <a href="#">Franchise</a>
+                <a href="#">FAQ</a>
+                <a href="#">Stores</a>
+                <a href="#">Contact Us</a>
+                <a href="login.html">My Account</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="index.html">Home</a></li>
+            <li class="nav-item"><a href="#">Pork</a></li>
+            <li class="nav-item"><a href="#">Chicken</a></li>
+            <li class="nav-item"><a href="#">Beef</a></li>
+            <li class="nav-item"><a href="#">Ready To Cook</a></li>
+            <li class="nav-item"><a href="#">Seafood</a></li>
+            <li class="nav-item"><a href="#">Eggs</a></li>
+            <li class="nav-item"><a href="#">Others</a></li>
+            <li class="nav-item"><a href="#">Sale</a></li>
+            <li class="nav-item"><a href="#">Gift Card</a></li>
+            <li class="nav-item"><a href="cart.html">Cart</a></li>
+        </ul>
+    </nav>
+
+    <!-- User Dashboard Section -->
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h2>Hi</h2>
+            <p id="user-email"></p>
+            <ul>
+                <li><a href="#" id="dashboard-link">Dashboard</a></li>
+                <li><a href="#" id="addresses-link">Addresses</a></li>
+                <li><a href="#" id="account-details-link">Account Details</a></li>
+                <li><a href="login.html" id="logout">Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div id="dashboard-content" class="tab-content active">
+                <h3>Dashboard</h3>
+                <p>Welcome to your dashboard! Here you can view your recent orders and manage your account.</p>
+            </div>
+            <div id="addresses-content" class="tab-content">
+                <h3>Addresses</h3>
+                <p>Manage your shipping and billing addresses here.</p>
+            </div>
+            <div id="account-details-content" class="tab-content">
+                <h4>Account Details</h4>
+                <form id="account-details-form">
+                    <div class="form-group">
+                        <label for="first-name">First Name *</label>
+                        <input type="text" id="first-name" value="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last Name *</label>
+                        <input type="text" id="last-name" value="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="display-name">Display Name *</label>
+                        <input type="text" id="display-name" value="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" value="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="current-password">Current Password (leave blank to leave unchanged)</label>
+                        <input type="password" id="current-password">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">New Password (leave blank to leave unchanged)</label>
+                        <input type="password" id="new-password">
+                    </div>
+                    <button type="submit" class="auth-button">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulating user data retrieval
+        const username = localStorage.getItem('username') || 'Guest';
+        const email = localStorage.getItem('email') || 'guest@example.com';
+
+        // Display user details
+        document.getElementById('user-email').textContent = email;
+
+        // Logout functionality
+        document.getElementById('logout').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior
+            localStorage.removeItem('username'); // Clear username
+            localStorage.removeItem('email'); // Clear email
+            window.location.href = 'login.html'; // Redirect to login page
+        });
+
+        // Tab functionality
+        document.getElementById('dashboard-link').addEventListener('click', function() {
+            showTab('dashboard-content');
+        });
+
+        document.getElementById('addresses-link').addEventListener('click', function() {
+            showTab('addresses-content');
+        });
+
+        document.getElementById('account-details-link').addEventListener('click', function() {
+            showTab('account-details-content');
+        });
+
+        function showTab(tabId) {
+            // Hide all tab contents
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show the selected tab
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Populate account details form with existing user data
+        document.getElementById('first-name').value = username.split(' ')[0]; // Assuming first name is the first part of the username
+        document.getElementById('last-name').value = username.split(' ')[1] || ''; // Assuming last name is the second part of the username
+        document.getElementById('display-name').value = username;
+        document.getElementById('email').value = email;
+
+        // Handle account details form submission
+        document.getElementById('account-details-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            // Here you can add logic to save the updated account details
+            alert('Account details updated successfully!');
+        });
+    </script>
+</body>
+</html> 
