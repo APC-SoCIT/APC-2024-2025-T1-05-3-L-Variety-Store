@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Supplier
-from .forms import ProductForm, SupplierForm
+from .forms import ProductForm, SupplierForm, AdjustStockForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
@@ -41,39 +41,34 @@ def format_price(value, currency='PHP'):
 
 @login_required
 def product_list(request):
-    products = Product.objects.all().values(
-        'product_id',
-        'product_name',
-        'product_description',
-        'product_quantity',
-        'product_price',
-        'product_category',
-        'product_status',
-        'product_barcode'
-    )
+    products = Product.objects.all().prefetch_related('suppliers')
     return render(request, 'Inventory/product_list.html', {'products': products})
 
 @login_required
 def product_create_or_edit(request, product_id=None):
-    product = None
     if product_id:
         product = get_object_or_404(Product, product_id=product_id)
-    
+        form_title = "Edit Product"
+    else:
+        product = None
+        form_title = "Add Product"
+
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()
+            product = form.save(commit=False)  # Don't save M2M yet
+            product.save()  # Save the instance first
+            form.save_m2m()  # Now save the M2M data
+            messages.success(request, "Product saved successfully.")
             return redirect('inventory:product_list')
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = ProductForm(instance=product)
-    
-    suppliers = Supplier.objects.all()
-    form_title = 'Edit Product' if product else 'Create Product'
-    
-    return render(request, 'inventory/product_form.html', {
+        form_title = "Edit Product" if product_id else "Add Product"
+
+    return render(request, 'Inventory/product_form.html', {
         'form': form,
-        'suppliers': suppliers,
-        'product': product,
         'product_form_title': form_title,
     })
 
@@ -126,12 +121,12 @@ def supplier_detail(request, supplier_id):
 
 @login_required
 def delete_product(request, product_id):
-    """Handle deleting a product."""
-    product = get_object_or_404(Product, ProductId=product_id)
-    product_name = product.ProductName  # Corrected field name
-    product.delete()
-    messages.success(request, f'Product "{product_name}" has been successfully deleted.')
-    return redirect('inventory:product_list')
+    product = get_object_or_404(Product, product_id=product_id)
+    if request.method == 'POST':
+        product.delete()
+        messages.success(request, f'Product "{product.product_name}" has been deleted.')
+        return redirect('inventory:product_list')
+    return render(request, 'Inventory/delete_product_confirm.html', {'product': product})
 
 @login_required
 def product_status_view(request):
@@ -140,6 +135,44 @@ def product_status_view(request):
 
 @login_required
 def product_gallery(request):
-    # Use select_related to get all related fields efficiently
     products = Product.objects.all()
-    return render(request, 'Inventory/product_gallery.html', {'products': products})
+    categories = Product.CATEGORY_CHOICES  # Get the category choices from the Product model
+    categorized_products = {category[0]: [] for category in categories}  # Create a dictionary for categories
+
+    # Group products by category
+    for product in products:
+        categorized_products[product.product_category].append(product)
+
+    return render(request, 'Inventory/product_gallery.html', {'categorized_products': categorized_products})
+
+@login_required
+def adjust_stock(request, product_id):
+    """Handle adjusting stock for a product."""
+    product = get_object_or_404(Product, product_id=product_id)
+    
+    if request.method == 'POST':
+        form = AdjustStockForm(request.POST)
+        if form.is_valid():
+            action = form.cleaned_data.get('action')
+            quantity = form.cleaned_data.get('new_stock')
+
+            if action == 'add':
+                product.product_quantity += quantity
+                messages.success(request, f'Stock for "{product.product_name}" has been increased by {quantity}.')
+            elif action == 'remove':
+                if quantity > product.product_quantity:
+                    messages.error(request, f'Cannot remove {quantity} units. Only {product.product_quantity} in stock.')
+                    return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
+                product.product_quantity -= quantity
+                messages.success(request, f'Stock for "{product.product_name}" has been decreased by {quantity}.')
+            else:
+                messages.error(request, "Invalid action.")
+                return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
+
+            product.save()
+            return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
+        else:
+            messages.error(request, "Invalid input. Please try again.")
+            return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
+    
+    return redirect('inventory:product_list')

@@ -19,7 +19,7 @@ class Supplier(models.Model):
     description = models.TextField(max_length=255)
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return f"{self.first_name} {self.last_name}"
 
 # Inventory Model
 class Product(models.Model):
@@ -45,7 +45,7 @@ class Product(models.Model):
     product_barcode = models.CharField(max_length=50, unique=True, blank=True)
     barcode_image = models.ImageField(upload_to='barcodes/', blank=True, null=True)
     product_image = models.ImageField(upload_to='product_images/', blank=True, null=True)
-    suppliers = models.ManyToManyField('Supplier', blank=True)
+    suppliers = models.ManyToManyField('Supplier', related_name='products', blank=True)
     
     
 

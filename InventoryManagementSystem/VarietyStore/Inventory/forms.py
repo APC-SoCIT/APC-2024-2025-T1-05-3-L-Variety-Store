@@ -39,3 +39,12 @@ class SupplierForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+        
+class AdjustStockForm(forms.Form):
+    ACTION_CHOICES = [
+        ('add', 'Add Stock'),
+        ('remove', 'Remove Stock'),
+    ]
+
+    action = forms.ChoiceField(choices=ACTION_CHOICES, widget=forms.RadioSelect, label="Action")
+    new_stock = forms.IntegerField(min_value=1, label="Quantity", widget=forms.NumberInput(attrs={'class': 'form-control'}))

@@ -1,73 +1,103 @@
 {% extends "Inventory/base.html" %}
+{% load widget_tweaks %}
 
 {% block title %}Product Gallery{% endblock %}
 
-{% block header %}Products Gallery View{% endblock %}
-
 {% block content %}
 <div class="container mt-5">
-    <div class="row mb-4">
-        <div class="col">
-            <h2 class="float-start">Product Gallery</h2>
-            <div class="float-end">
-                <a href="{% url 'inventory:product_create' %}" class="btn btn-success me-2">Add Product</a>
-                <a href="{% url 'inventory:product_list' %}" class="btn btn-primary">Switch to List View</a>
-            </div>
-        </div>
+    <h2>Product Gallery</h2>
+
+    <div class="mb-4">
+        <a href="{% url 'inventory:product_create' %}" class="btn btn-success me-2">Add Product</a>
+        <a href="{% url 'inventory:product_list' %}" class="btn btn-primary">Switch to List View</a>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-        {% for product in products %}
-        <div class="col">
-            <div class="card h-100">
-                {% if product.product_image %}
-                    <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_name }}" style="height: 200px; object-fit: cover;">
-                {% else %}
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                        <span class="text-muted">No Image</span>
+    {% for category, products in categorized_products.items %}
+        {% if products|length > 0 %}
+            <h3>{{ category }}</h3>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2 mb-4">
+                {% for product in products %}
+                <div class="col">
+                    <div class="card h-100" style="max-width: 200px; margin: auto;">
+                        {% if product.product_image %}
+                            <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_name }}" style="height: 120px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 120px;">
+                                <span class="text-muted">No Image</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body" style="padding: 0.5rem;">
+                            <h5 class="card-title" style="font-size: 0.9rem;">{{ product.product_name }}</h5>
+                            <p class="card-text text-truncate" style="font-size: 0.8rem;">{{ product.product_description }}</p>
+                            <p class="card-text">
+                                <small class="text-muted">Category: {{ product.product_category }}</small>
+                            </p>
+                            <p class="card-text">
+                                <strong style="font-size: 0.9rem;">Price: ₱{{ product.product_price }}</strong><br>
+                                <span class="badge {% if product.product_quantity > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                    Stock: {{ product.product_quantity }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0" style="padding: 0.5rem;">
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'inventory:product_edit' product.product_id %}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{% url 'inventory:product_delete' product.product_id %}" class="btn btn-danger btn-sm">Delete</a>
+                                <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#adjustStockModal{{ product.product_id }}">Adjust Stock</button>
+                            </div>
+                        </div>
                     </div>
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ product.product_name }}</h5>
-                    <p class="card-text text-truncate">{{ product.product_description }}</p>
-                    <p class="card-text">
-                        <small class="text-muted">Category: {{ product.product_category }}</small>
-                    </p>
-                    <p class="card-text">
-                        <strong>Price: ₱{{ product.product_price }}</strong><br>
-                        <span class="badge {% if product.product_quantity > 0 %}bg-success{% else %}bg-danger{% endif %}">
-                            Stock: {{ product.product_quantity }}
-                        </span>
-                    </p>
-                    <p class="card-text">
-                        <small class="text-muted">Barcode: {{ product.product_barcode }}</small>
-                    </p>
                 </div>
-                <div class="card-footer bg-transparent border-top-0">
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'inventory:product_edit' product.product_id %}" class="btn btn-warning btn-sm">Edit</a>
-                        <a href="{% url 'inventory:product_delete' product.product_id %}" class="btn btn-danger btn-sm">Delete</a>
+
+                <!-- Adjust Stock Modal -->
+                <div class="modal fade" id="adjustStockModal{{ product.product_id }}" tabindex="-1" aria-labelledby="adjustStockModalLabel{{ product.product_id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="adjustStockModalLabel{{ product.product_id }}">Adjust Stock for {{ product.product_name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="POST" action="{% url 'inventory:adjust_stock' product.product_id %}">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="action{{ product.product_id }}" class="form-label">Action:</label>
+                                        <div>
+                                            <input type="radio" id="add{{ product.product_id }}" name="action" value="add" required>
+                                            <label for="add{{ product.product_id }}">Add Stock</label>
+                                            <input type="radio" id="remove{{ product.product_id }}" name="action" value="remove" required>
+                                            <label for="remove{{ product.product_id }}">Remove Stock</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="new_stock{{ product.product_id }}" class="form-label">Quantity:</label>
+                                        <input type="number" class="form-control" id="new_stock{{ product.product_id }}" name="new_stock" min="1" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-        </div>
-        {% endfor %}
-    </div>
+        {% endif %}
+    {% endfor %}
 </div>
 
 <style>
     .card {
         transition: transform 0.2s ease-in-out;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
 
     .card-title {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         font-weight: bold;
     }
 
@@ -77,11 +107,11 @@
 
     .btn-sm {
         padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
     }
 
-    .me-2 {
-        margin-right: 0.5rem;
+    .small-label {
+        font-size: 0.8rem;
     }
 </style>
 {% endblock %} 

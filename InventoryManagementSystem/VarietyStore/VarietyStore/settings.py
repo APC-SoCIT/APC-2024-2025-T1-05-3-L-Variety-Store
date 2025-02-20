@@ -33,6 +33,7 @@ LOGIN_URL = '/admin/login/'
 # Application definition
 
 INSTALLED_APPS = [
+    'widget_tweaks',
     'django_bootstrap5',
     'website',
     'accounts',

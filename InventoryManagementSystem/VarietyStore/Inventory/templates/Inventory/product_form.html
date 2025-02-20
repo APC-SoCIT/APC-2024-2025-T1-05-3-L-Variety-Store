@@ -1,5 +1,7 @@
 {% extends "Inventory/base.html" %}
 
+{% load widget_tweaks %}
+
 {% block title %}{{ product_form_title }}{% endblock %}
 
 {% block content %}
@@ -48,41 +50,37 @@
         <!-- Product Price -->
         <div class="mb-3">
             <label for="product_price" class="form-label">Product Price:</label>
-            <div class="input-group">
-                <span class="input-group-text">₱</span>
-                <input type="number" id="product_price" name="product_price" 
-                       value="{{ form.product_price.value|default_if_none:'' }}" 
-                       step="0.01" class="form-control" required>
-            </div>
+            <input type="number" step="0.01" id="product_price" name="product_price" 
+                   value="{{ form.product_price.value|default_if_none:'' }}" 
+                   class="form-control" required>
+        </div>
+
+        <!-- Barcode Image -->
+        <div class="mb-3">
+            <label for="barcode_image" class="form-label">Barcode Image:</label>
+            <input type="file" id="barcode_image" name="barcode_image" 
+                   class="form-control">
         </div>
 
         <!-- Product Image -->
         <div class="mb-3">
             <label for="product_image" class="form-label">Product Image:</label>
-            {% if product.product_image %}
-                <div class="mb-2">
-                    <img src="{{ product.product_image.url }}" alt="Current Product Image" 
-                         style="max-width: 200px; height: auto;">
-                </div>
-            {% endif %}
             <input type="file" id="product_image" name="product_image" 
-                   class="form-control" accept="image/*">
+                   class="form-control">
         </div>
 
         <!-- Product Status -->
-        <div class="mb-3">
-            <div class="form-check">
-                <input type="checkbox" id="product_status" name="product_status" 
-                       class="form-check-input" 
-                       {% if form.product_status.value %}checked{% endif %}>
-                <label class="form-check-label" for="product_status">Active Product</label>
-            </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" id="product_status" name="product_status" 
+                   class="form-check-input" 
+                   {% if form.product_status.value %}checked{% endif %}>
+            <label class="form-check-label" for="product_status">Active Product</label>
         </div>
 
         <!-- Suppliers -->
         <div class="mb-3">
-            <label class="form-label">Suppliers:</label>
-            {{ form.suppliers }}
+            <label for="id_suppliers" class="form-label">Suppliers:</label>
+            {{ form.suppliers|add_class:"form-control" |attr:"id:id_suppliers, multiple:multiple" }} 
         </div>
 
         <!-- Form Actions -->
@@ -93,6 +91,9 @@
     </form>
 </div>
 
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <style>
     .form-control:focus {
         border-color: #80bdff;
@@ -102,5 +103,24 @@
     .btn {
         margin-right: 10px;
     }
+
+    /* Adjust Select2 to fit Bootstrap */
+    .select2-container--default .select2-selection--multiple {
+        height: auto;
+        min-height: 38px;
+    }
 </style>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Select2 for Suppliers
+        $('#id_suppliers').select2({
+            placeholder: "Select suppliers",
+            allowClear: true
+        });
+    });
+</script>
 {% endblock %}

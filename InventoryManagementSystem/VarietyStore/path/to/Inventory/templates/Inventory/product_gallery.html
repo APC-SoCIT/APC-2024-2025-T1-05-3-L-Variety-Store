@@ -1,0 +1,174 @@
+{% extends "Inventory/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Product Gallery{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="float-start">Product Gallery</h2>
+            <div class="float-end">
+                <a href="{% url 'inventory:product_create' %}" class="btn btn-success me-2">Add Product</a>
+                <a href="{% url 'inventory:product_list' %}" class="btn btn-primary me-2">Switch to List View</a>
+                <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#adjustStockModal">
+                    Adjust Stock
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adjust Stock Modal -->
+    <div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adjust Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" id="adjustStockForm" action="{% url 'inventory:adjust_stock' product_id=0 %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="product_select_gallery" class="form-label small-label">Select Product:</label>
+                            <select class="form-select" id="product_select_gallery" name="product_id" required onchange="updateProductDetailsGallery()">
+                                <option value="" disabled selected>Select a product</option>
+                                {% for product in products %}
+                                    <option value="{{ product.product_id }}" data-barcode="{{ product.product_barcode }}" data-stock="{{ product.product_quantity }}">
+                                        {{ product.product_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Current Stock and Barcode Information on the Same Row -->
+                        <div class="mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="form-text text-muted">Current Stock: <span id="current_stock_display_gallery"></span></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="form-text text-muted">Barcode: <span id="barcode_display_gallery"></span></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="mb-3">
+                            <label for="new_stock_gallery" class="form-label small-label">Quantity:</label>
+                            <input type="number" class="form-control" id="new_stock_gallery" name="new_stock" min="1" required>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" name="action" value="add" class="btn btn-success">Add Stock</button>
+                            <button type="submit" name="action" value="remove" class="btn btn-danger">Remove Stock</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for product in products %}
+        <div class="col">
+            <div class="card h-100">
+                {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <span class="text-muted">No Image</span>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.product_name }}</h5>
+                    <p class="card-text text-truncate">{{ product.product_description }}</p>
+                    <p class="card-text">
+                        <small class="text-muted">Category: {{ product.product_category }}</small>
+                    </p>
+                    <p class="card-text">
+                        <strong>Price: ₱{{ product.product_price }}</strong><br>
+                        <span class="badge {% if product.product_quantity > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                            Stock: {{ product.product_quantity }}
+                        </span>
+                    </p>
+                    <p class="card-text">
+                        <small class="text-muted">Barcode: {{ product.product_barcode }}</small>
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'inventory:product_edit' product.product_id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'inventory:product_delete' product.product_id %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Adjust Stock Modal JavaScript -->
+<script>
+    function updateProductDetailsGallery() {
+        const select = document.getElementById('product_select_gallery');
+        const selectedOption = select.options[select.selectedIndex];
+        const currentStockDisplay = document.getElementById('current_stock_display_gallery');
+        const barcodeDisplay = document.getElementById('barcode_display_gallery');
+        const form = document.getElementById('adjustStockForm');
+
+        // Check if a product is selected
+        if (selectedOption && selectedOption.value) {
+            // Update the current stock and barcode displays based on the selected product
+            currentStockDisplay.textContent = selectedOption.getAttribute('data-stock');
+            barcodeDisplay.textContent = selectedOption.getAttribute('data-barcode');
+
+            // Update the form action with the selected product ID
+            const urlTemplate = "{% url 'inventory:adjust_stock' product_id=0 %}";
+            const newUrl = urlTemplate.replace('/0/', '/' + select.value + '/');
+            form.action = newUrl;
+        } else {
+            // Clear fields if no product is selected
+            currentStockDisplay.textContent = '';
+            barcodeDisplay.textContent = '';
+            form.action = "{% url 'inventory:adjust_stock' product_id=0 %}";  // Reset to default
+        }
+    }
+</script>
+
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+
+    /* Reduce font size for labels */
+    .small-label {
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
