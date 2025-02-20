@@ -6,7 +6,7 @@ from authentication.forms import PaymentForm
 def catalog(request):
     products = Product.objects.all()
     return render(request, 'pos/catalog.html', {'products': products})
-
+# Views
 @login_required
 def cart(request):
     cart_items = request.session.get('cart', {})
