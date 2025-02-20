@@ -21,7 +21,7 @@ def add_to_cart(request, product_id):
         cart[product_id] = 1
     request.session['cart'] = cart
     return redirect('catalog')
-
+# Remove
 @login_required
 def remove_from_cart(request, product_id):
     cart = request.session.get('cart', {})
