@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <a href="{% url 'pos' %}" class="btn-outline">Back</a>
+        <h1 class="text-2xl font-bold">Transaction Records</h1>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for transaction in transactions %}
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h3 class="font-medium text-lg">Order #{{ transaction.id }}</h3>
+                    <p class="text-sm text-gray-500">{{ transaction.timestamp|date:"Y-m-d H:i:s" }}</p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-medium 
+                    {% if transaction.status == 'completed' %}bg-green-100 text-green-800
+                    {% elif transaction.status == 'pending' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-red-100 text-red-800{% endif %}">
+                    {{ transaction.status|title }}
+                </span>
+            </div>
+            <p class="font-medium text-lg text-[#8B4513]">₱{{ transaction.total }}</p>
+            <p class="text-sm text-gray-500">{{ transaction.get_payment_method_display }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
