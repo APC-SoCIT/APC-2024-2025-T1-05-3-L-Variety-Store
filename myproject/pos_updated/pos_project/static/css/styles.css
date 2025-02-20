@@ -1,0 +1,35 @@
+.glass-panel {
+    @apply bg-white bg-opacity-50 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl shadow-lg;
+}
+
+.btn-outline {
+    @apply inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50;
+}
+
+.product-grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 gap-4;
+}
+
+.product-item {
+    @apply p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 text-left w-full;
+}
+
+.category-btn {
+    @apply px-4 py-2 rounded-md border border-gray-300;
+}
+
+.category-btn.active {
+    @apply bg-[#8B4513] text-white border-[#8B4513];
+}
+
+.payment-btn {
+    @apply px-4 py-2 rounded-md bg-[#8B4513] text-white hover:bg-[#723A0F];
+}
+
+.qty-btn {
+    @apply w-8 h-8 rounded-md border border-gray-300 flex items-center justify-center;
+}
+
+.remove-btn {
+    @apply w-8 h-8 rounded-md bg-red-500 text-white flex items-center justify-center;
+}
