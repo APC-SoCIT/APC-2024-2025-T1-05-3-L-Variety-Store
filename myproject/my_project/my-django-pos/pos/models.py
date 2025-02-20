@@ -25,7 +25,7 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f'Transaction of {self.quantity} x {self.product.name}'
-
+# Models
 class ShoppingCart(models.Model):
     products = models.ManyToManyField(Product, through='CartItem')
 
