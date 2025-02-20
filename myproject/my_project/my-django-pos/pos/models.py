@@ -28,7 +28,7 @@ class Transaction(models.Model):
 # Models
 class ShoppingCart(models.Model):
     products = models.ManyToManyField(Product, through='CartItem')
-
+# Updated Models
 class CartItem(models.Model):
     cart = models.ForeignKey(ShoppingCart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
