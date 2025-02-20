@@ -3,33 +3,58 @@
 
 {% block title %}Product List{% endblock %}
 
-{% block header %}Products{% endblock %}
+{% block header %}
+<div class="d-flex align-items-center">
+    <h2 class="me-2"><i class="fas fa-box-open"></i> Product List</h2>
+</div>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">Product List</h2>
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="float-start">Product List</h2>
+            <div class="float-end">
+                <a href="{% url 'inventory:product_create' %}" class="btn btn-success me-2"><i class="fas fa-plus"></i> Add Product</a>
+                <a href="{% url 'inventory:product_gallery' %}" class="btn btn-primary"><i class="fas fa-th"></i> Switch to Gallery View</a>
+            </div>
+        </div>
+    </div>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Product Name</th>
+                <th>Name</th>
                 <th>Price</th>
                 <th>Quantity</th>
+                <th>Category</th>
+                <th>Barcode Number</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for product in products %}
             <tr>
-                <td>{{ product.name }}</td>
-                <td>{{ product.price }}</td>
-                <td>{{ product.stock }}</td>
+                <td>{{ product.product_name }}</td>
+                <td>₱{{ product.product_price }}</td>
+                <td>{{ product.product_quantity }}</td>
+                <td>{{ product.product_category }}</td>
+                <td>{{ product.product_barcode }}</td>
                 <td>
-                    <a href="{% url 'inventory:product_edit' product.ProductId %}" class="btn btn-warning">Edit</a>
-                    <a href="{% url 'inventory:product_delete' product.ProductId %}" class="btn btn-danger">Delete</a>
+                    <a href="{% url 'inventory:product_edit' product.product_id %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="{% url 'inventory:product_delete' product.product_id %}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<style>
+    .btn-sm {
+        margin-right: 5px;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+</style>
 {% endblock %}

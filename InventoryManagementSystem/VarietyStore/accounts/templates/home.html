@@ -121,7 +121,7 @@
             <h3>Welcome, {{ user.username }}!</h3>
             <nav>
                 <ul>
-                    <li><a href="{% url 'product_list' %}">Inventory</a></li>
+                    <li><a href="{% url 'inventory:product_list' %}">Inventory</a></li>
 
                     <li><a href="{% url 'admin:index' %}">Admin Panel</a></li>
                     <li><a href="{% url 'accounts:logout' %}">Logout</a></li>

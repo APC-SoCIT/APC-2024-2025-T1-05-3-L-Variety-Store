@@ -1,317 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "Inventory/base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product_form_title }}</title>
-    <style>
-        /* Style the checkbox container */
-        .form-group .form-check-input {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            cursor: pointer;
-            accent-color: #4CAF50; /* Modern browsers will style checkboxes */
-        }
+{% block title %}{{ product_form_title }}{% endblock %}
 
-        /* Custom styles for the checkbox when checked */
-        .form-group .form-check-input:checked {
-            background-color: #4CAF50; /* Green background */
-            border-color: #4CAF50; /* Green border */
-            box-shadow: 0 0 5px rgba(76, 175, 80, 0.8); /* Glowing effect */
-        }
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ product_form_title }}</h1>
 
-        .form-group .form-check-input:checked::before {
-            content: '✔'; /* Custom checkmark */
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
 
-        /* Optional hover effect */
-        .form-group .form-check-input:hover {
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.8); /* Subtle glow on hover */
-            border-color: #4CAF50;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        form {
-            width: 90%;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 2em;
-            color: #333;
-        }
-
-        label {
-            font-weight: bold;
-            margin-top: 10px;
-            display: block;
-            color: #555;
-        }
-
-        input, select, textarea {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-
-        .d-flex {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .currency-select {
-            width: 20%;
-            font-size: 0.9em;
-            border-radius: 5px;
-        }
-
-        .price-input {
-            width: 80%;
-        }
-
-        .btn {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            text-align: center;
-            border-radius: 5px;
-            font-size: 1em;
-            text-decoration: none;
-            margin-right: 10px;
-            border: none;
-        }
-
-        .btn:hover {
-            background-color: #45a049;
-        }
-
-        .btn-secondary {
-            background-color: #f44336;
-        }
-
-        .btn-secondary:hover {
-            background-color: #d32f2f;
-        }
-
-        .supplier-link {
-            font-size: 0.9em;
-            color: #4CAF50;
-            text-decoration: none;
-            margin-bottom: 15px;
-        }
-
-        .supplier-link:hover {
-            text-decoration: underline;
-        }
-
-        .add-supplier-btn {
-            background-color: #007bff;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .add-supplier-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .remove-supplier-btn {
-            color: #ffffff;
-            background-color: #dc3545;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 10px;
-            font-size: 0.9em;
-            border: none;
-        }
-
-        .remove-supplier-btn:hover {
-            background-color: #c82333;
-        }
-
-        .form-actions {
-            text-align: right;
-            margin-top: 20px;
-        }
-
-        input[readonly] {
-            background-color: #e9ecef;
-            color: #6c757d;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-<script>
-    // Add supplier dropdown dynamically
-    function addSupplierDropdown() {
-        const suppliersDiv = document.getElementById('suppliers-container');
-        const supplierCount = suppliersDiv.children.length;
-
-        const newSupplierDiv = document.createElement('div');
-        newSupplierDiv.className = 'mb-3 supplier-entry';
-
-        newSupplierDiv.innerHTML = `
-            <label for="Supplier${supplierCount}" class="form-label">Supplier ${supplierCount + 1}</label>
-            <select name="Suppliers" id="Supplier${supplierCount}" class="form-control">
-                {% for supplier in suppliers %}
-                    <option value="{{ supplier.SupplierId }}">{{ supplier.FirstName }} {{ supplier.LastName }}</option>
-                {% endfor %}
-            </select>
-            <span class="remove-supplier-btn" onclick="removeSupplierDropdown(this)">Remove</span>
-        `;
-
-        suppliersDiv.appendChild(newSupplierDiv);
-    }
-
-    // Remove supplier dropdown dynamically
-    function removeSupplierDropdown(element) {
-        element.parentElement.remove();
-    }
-
-    // Function to handle the active checkbox validation
-    function validateActiveStatus() {
-        const quantity = document.getElementById("ProductQuantity").value;
-        const isActiveCheckbox = document.getElementById("ProductStatus");
-
-        // If quantity is 0, disable the active checkbox
-        if (quantity == 0) {
-            if (isActiveCheckbox.checked) {
-                alert("The product cannot be active if the stock is 0.");
-                isActiveCheckbox.checked = false; // Uncheck the box
-            }
-            isActiveCheckbox.disabled = true; // Disable the checkbox
-        } else {
-            isActiveCheckbox.disabled = false; // Enable the checkbox if stock is not 0
-        }
-    }
-
-    // Call the validation function on quantity change
-    function onQuantityChange() {
-        validateActiveStatus();
-    }
-
-    // Optional: You can add a cancel action to reset the form
-    function cancelForm() {
-        window.history.back(); // Go back to the previous page
-    }
-
-    window.onload = function() {
-        validateActiveStatus(); // Initial validation on page load
-    };
-</script>
-
-<body>
-
-<h1>{{ product_form_title }}</h1>
-
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-
-    <!-- Product Name -->
-    <label for="ProductName">Product Name:</label>
-    <input type="text" id="ProductName" name="ProductName" value="{{ form.ProductName.value|default_if_none:'' }}" placeholder="Enter product name" required>
-
-    <!-- Product Description -->
-    <label for="ProductDescription">Product Description:</label>
-    <textarea id="ProductDescription" name="ProductDescription" rows="4" placeholder="Enter product description" required>{{ form.ProductDescription.value|default_if_none:'' }}</textarea>
-
-    <!-- Product Quantity -->
-    <label for="ProductQuantity">Product Quantity:</label>
-    <input type="number" id="ProductQuantity" name="ProductQuantity" value="{{ form.ProductQuantity.value|default_if_none:'' }}" placeholder="0" required oninput="onQuantityChange()">
-
-    <!-- Product Type -->
-    <label for="ProductType">Product Type:</label>
-    <input type="text" id="ProductType" name="ProductType" value="{{ form.ProductType.value|default_if_none:'' }}" placeholder="Enter product type" required>
-
-    <!-- Product Price -->
-    <label for="ProductPrice">Product Price:</label>
-    <div class="d-flex align-items-center">
-        <select name="currency" id="currency" class="currency-select">
-            <option value="PHP" {% if currency == 'PHP' %}selected{% endif %}>PHP</option>
-            <option value="USD" {% if currency == 'USD' %}selected{% endif %}>USD</option>
-            <option value="EUR" {% if currency == 'EUR' %}selected{% endif %}>EUR</option>
-            <option value="JPY" {% if currency == 'JPY' %}selected{% endif %}>JPY</option>
-            <option value="GBP" {% if currency == 'GBP' %}selected{% endif %}>GBP</option>
-        </select>
-        <input type="number" id="ProductPrice" name="ProductPrice" value="{{ form.ProductPrice.value|default_if_none:'' }}" step="0.01" placeholder="0.00" class="price-input" required>
-    </div>
-
-    <!-- Barcode -->
-    <label for="BarcodeNumber">Barcode Number:</label>
-    <input type="text" id="BarcodeNumber" name="ProductBarcode" value="{{ product.ProductBarcode|default_if_none:'' }}" readonly>
-
-    <!-- Product Picture -->
-    <label for="ProductImage">Product Picture:</label>
-    {% if product.ProductImage %}
+        <!-- Product Name -->
         <div class="mb-3">
-            <img src="{{ product.ProductImage.url }}" alt="Current Product Image" style="width: 150px; height: auto; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px;">
-            <p class="text-muted">Current Picture</p>
+            <label for="product_name" class="form-label">Product Name:</label>
+            <input type="text" id="product_name" name="product_name" 
+                   value="{{ form.product_name.value|default_if_none:'' }}" 
+                   class="form-control" required>
         </div>
-    {% endif %}
-    <input type="file" id="ProductImage" name="ProductImage" accept="image/*">
 
-    <div class="form-group">
-        <label for="id_ProductStatus" class="form-label">Is Active:</label>
-        <div class="d-flex align-items-center">
-            <input type="checkbox" id="ProductStatus" name="ProductStatus" {% if form.ProductStatus.value %}checked{% endif %} class="form-check-input">
-            <label for="ProductStatus" class="form-check-label"></label>
+        <!-- Product Description -->
+        <div class="mb-3">
+            <label for="product_description" class="form-label">Product Description:</label>
+            <textarea id="product_description" name="product_description" 
+                      class="form-control" rows="4" required>{{ form.product_description.value|default_if_none:'' }}</textarea>
         </div>
-    </div>
 
-    <!-- Suppliers Section -->
-    <div id="suppliers-container">
-        {% for supplier in product.Suppliers.all %}
-        <div class="mb-3 supplier-entry">
-            <label for="Supplier{{ forloop.counter }}" class="form-label">Supplier {{ forloop.counter }}</label>
-            <select name="Suppliers" id="Supplier{{ forloop.counter }}" class="form-control">
-                {% for sup in suppliers %}
-                    <option value="{{ sup.SupplierId }}" {% if sup.SupplierId == supplier.SupplierId %}selected{% endif %}>
-                        {{ sup.FirstName }} {{ sup.LastName }}
+        <!-- Product Quantity -->
+        <div class="mb-3">
+            <label for="product_quantity" class="form-label">Product Quantity:</label>
+            <input type="number" id="product_quantity" name="product_quantity" 
+                   value="{{ form.product_quantity.value|default_if_none:'' }}" 
+                   class="form-control" required>
+        </div>
+
+        <!-- Product Category -->
+        <div class="mb-3">
+            <label for="product_category" class="form-label">Product Category:</label>
+            <select id="product_category" name="product_category" class="form-control" required>
+                {% for choice in form.fields.product_category.choices %}
+                    <option value="{{ choice.0 }}" 
+                            {% if form.product_category.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
                     </option>
                 {% endfor %}
             </select>
-            <button type="button" class="remove-supplier-btn" onclick="removeSupplierDropdown(this)">Remove</button>
         </div>
-        {% endfor %}
-    </div>
-    <button type="button" class="add-supplier-btn" onclick="addSupplierDropdown()">Add Supplier</button>
 
-    <!-- Save and Cancel Buttons -->
-    <div class="form-actions">
-        <button type="submit" class="btn">Save Product</button>
-        <a href="{% url 'inventory:product_list' %}" class="btn btn-secondary">Cancel</a>
-    </div>
-</form>
+        <!-- Product Price -->
+        <div class="mb-3">
+            <label for="product_price" class="form-label">Product Price:</label>
+            <div class="input-group">
+                <span class="input-group-text">₱</span>
+                <input type="number" id="product_price" name="product_price" 
+                       value="{{ form.product_price.value|default_if_none:'' }}" 
+                       step="0.01" class="form-control" required>
+            </div>
+        </div>
 
-</body>
-</html>
+        <!-- Product Image -->
+        <div class="mb-3">
+            <label for="product_image" class="form-label">Product Image:</label>
+            {% if product.product_image %}
+                <div class="mb-2">
+                    <img src="{{ product.product_image.url }}" alt="Current Product Image" 
+                         style="max-width: 200px; height: auto;">
+                </div>
+            {% endif %}
+            <input type="file" id="product_image" name="product_image" 
+                   class="form-control" accept="image/*">
+        </div>
+
+        <!-- Product Status -->
+        <div class="mb-3">
+            <div class="form-check">
+                <input type="checkbox" id="product_status" name="product_status" 
+                       class="form-check-input" 
+                       {% if form.product_status.value %}checked{% endif %}>
+                <label class="form-check-label" for="product_status">Active Product</label>
+            </div>
+        </div>
+
+        <!-- Suppliers -->
+        <div class="mb-3">
+            <label class="form-label">Suppliers:</label>
+            {{ form.suppliers }}
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Save Product</button>
+            <a href="{% url 'inventory:product_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .btn {
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}

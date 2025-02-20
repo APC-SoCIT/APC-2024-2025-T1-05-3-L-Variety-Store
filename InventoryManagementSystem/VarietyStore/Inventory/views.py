@@ -41,85 +41,33 @@ def format_price(value, currency='PHP'):
 
 @login_required
 def product_list(request):
-    products = Product.objects.all()
-    
-    # Update active status based on stock and save changes to the database
-    for product in products:
-        if product.ProductQuantity == 0:  # Check stock value
-            product.ProductStatus = False  # Set active status to False
-            product.save()  # Save the changes to the database
-
-    currency = request.GET.get('currency', 'PHP')
-    product_type = request.GET.get('type', '')
-    search_query = request.GET.get('search', '')
-    sort_by = request.GET.get('sort', '')
-
-    # Get only unique product types that are used by products in the database
-    used_product_types = Product.objects.values_list('ProductType', flat=True).distinct()
-
-    # Filtering by product type
-    if product_type:
-        products = products.filter(ProductType=product_type)
-
-    # Search by product name
-    if search_query:
-        products = products.filter(ProductName__icontains=search_query)
-
-    # Sorting
-    if sort_by == 'price_asc':
-        products = products.order_by('ProductPrice')
-    elif sort_by == 'price_desc':
-        products = products.order_by('-ProductPrice')
-    elif sort_by == 'stock_asc':
-        products = products.order_by('ProductQuantity')
-    elif sort_by == 'stock_desc':
-        products = products.order_by('-ProductQuantity')
-    elif sort_by == 'active':
-        products = products.order_by('ProductStatus')
-
-    # Format the products for currency and other fields
-    formatted_products = []
-    for product in products:
-        formatted_price = format_price(product.ProductPrice, currency)
-        formatted_products.append({
-            'ProductId': product.ProductId,  # Ensure ProductId is included
-            'image': product.ProductImage.url if product.ProductImage else None,
-            'name': product.ProductName,
-            'type': product.ProductType,
-            'price': formatted_price,
-            'barcode': product.ProductBarcode,
-            'barcode_image': product.BarcodeImage.url if product.BarcodeImage else None,
-            'active': product.ProductStatus,
-            'suppliers': product.Suppliers.all(),
-            'stock': product.ProductQuantity,
-        })
-
-    return render(request, 'inventory/product_list.html', {
-        'products': formatted_products,
-        'currency': currency,
-        'product_types': used_product_types,  # Pass the list of used product types
-    })
+    products = Product.objects.all().values(
+        'product_id',
+        'product_name',
+        'product_description',
+        'product_quantity',
+        'product_price',
+        'product_category',
+        'product_status',
+        'product_barcode'
+    )
+    return render(request, 'Inventory/product_list.html', {'products': products})
 
 @login_required
-def product_create_or_edit(request, ProductId=None):
-    # If ProductId is provided, fetch the product for editing
+def product_create_or_edit(request, product_id=None):
     product = None
-    if ProductId:
-        product = get_object_or_404(Product, ProductId=ProductId)
+    if product_id:
+        product = get_object_or_404(Product, product_id=product_id)
     
-    # Handle the form submission (both for creating and editing)
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)  # Pass the existing product for editing
+        form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()  # Save the new or updated product
-            return redirect('inventory:product_list')  # Redirect to the product list after saving
+            form.save()
+            return redirect('inventory:product_list')
     else:
-        form = ProductForm(instance=product)  # Initialize the form with existing product data (if editing)
+        form = ProductForm(instance=product)
     
-    # Pass all suppliers for the dropdown
     suppliers = Supplier.objects.all()
-
-    # Set the appropriate title based on whether the product exists (edit or create)
     form_title = 'Edit Product' if product else 'Create Product'
     
     return render(request, 'inventory/product_form.html', {
@@ -147,7 +95,7 @@ def supplier_list(request):
     suppliers = Supplier.objects.all()
 
     if search_query:
-        suppliers = suppliers.filter(FirstName__icontains=search_query) | suppliers.filter(LastName__icontains=search_query)
+        suppliers = suppliers.filter(first_name__icontains=search_query) | suppliers.filter(last_name__icontains=search_query)
 
     return render(request, 'inventory/supplier_list.html', {'suppliers': suppliers})
 
@@ -189,3 +137,9 @@ def delete_product(request, product_id):
 def product_status_view(request):
     products = Product.objects.all()
     return render(request, 'inventory/product_list.html', {'products': products})
+
+@login_required
+def product_gallery(request):
+    # Use select_related to get all related fields efficiently
+    products = Product.objects.all()
+    return render(request, 'Inventory/product_gallery.html', {'products': products})

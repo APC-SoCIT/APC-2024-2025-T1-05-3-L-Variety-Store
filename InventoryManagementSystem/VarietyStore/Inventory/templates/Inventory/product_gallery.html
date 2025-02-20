@@ -1,0 +1,87 @@
+{% extends "Inventory/base.html" %}
+
+{% block title %}Product Gallery{% endblock %}
+
+{% block header %}Products Gallery View{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="float-start">Product Gallery</h2>
+            <div class="float-end">
+                <a href="{% url 'inventory:product_create' %}" class="btn btn-success me-2">Add Product</a>
+                <a href="{% url 'inventory:product_list' %}" class="btn btn-primary">Switch to List View</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for product in products %}
+        <div class="col">
+            <div class="card h-100">
+                {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <span class="text-muted">No Image</span>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.product_name }}</h5>
+                    <p class="card-text text-truncate">{{ product.product_description }}</p>
+                    <p class="card-text">
+                        <small class="text-muted">Category: {{ product.product_category }}</small>
+                    </p>
+                    <p class="card-text">
+                        <strong>Price: ₱{{ product.product_price }}</strong><br>
+                        <span class="badge {% if product.product_quantity > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                            Stock: {{ product.product_quantity }}
+                        </span>
+                    </p>
+                    <p class="card-text">
+                        <small class="text-muted">Barcode: {{ product.product_barcode }}</small>
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'inventory:product_edit' product.product_id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'inventory:product_delete' product.product_id %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .me-2 {
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %} 
