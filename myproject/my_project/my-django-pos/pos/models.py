@@ -1,5 +1,5 @@
 from django.db import models
-
+#
 class Product(models.Model):
     CATEGORY_CHOICES = [
         ('meat', 'Meat'),
@@ -25,10 +25,10 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f'Transaction of {self.quantity} x {self.product.name}'
-
+# Models
 class ShoppingCart(models.Model):
     products = models.ManyToManyField(Product, through='CartItem')
-
+# Updated Models
 class CartItem(models.Model):
     cart = models.ForeignKey(ShoppingCart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

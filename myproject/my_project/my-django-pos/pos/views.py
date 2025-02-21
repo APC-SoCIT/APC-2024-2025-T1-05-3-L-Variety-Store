@@ -6,7 +6,7 @@ from authentication.forms import PaymentForm
 def catalog(request):
     products = Product.objects.all()
     return render(request, 'pos/catalog.html', {'products': products})
-
+# Views
 @login_required
 def cart(request):
     cart_items = request.session.get('cart', {})
@@ -29,7 +29,7 @@ def remove_from_cart(request, product_id):
         del cart[product_id]
     request.session['cart'] = cart
     return redirect('cart')
-
+#diko mahanap error tim
 @login_required
 def payment(request):
     if request.method == 'POST':
@@ -48,6 +48,7 @@ def payment(request):
         form = PaymentForm()
     return render(request, 'pos/payment.html', {'form': form})
 
+#Updated Reciept
 @login_required
 def receipt(request, transaction_id):
     transaction = Transaction.objects.get(id=transaction_id)
