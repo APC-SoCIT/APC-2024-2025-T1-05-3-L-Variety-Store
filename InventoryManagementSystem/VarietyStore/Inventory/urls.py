@@ -15,4 +15,5 @@ urlpatterns = [
     path('supplier/<int:supplier_id>/', views.supplier_detail, name='supplier_detail'),
     path('products/gallery/', views.product_gallery, name='product_gallery'),
     path('products/adjust_stock/<int:product_id>/', views.adjust_stock, name='adjust_stock'),
+    path('inventory-transactions/', views.inventory_transaction_report, name='inventory_transaction_report'),
 ]

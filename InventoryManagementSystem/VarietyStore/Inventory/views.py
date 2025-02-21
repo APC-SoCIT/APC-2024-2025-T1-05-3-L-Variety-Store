@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Supplier
+from .models import Product, Supplier, InventoryTransaction, TRANSACTION_TYPE_CHOICES
 from .forms import ProductForm, SupplierForm, AdjustStockForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -169,6 +169,14 @@ def adjust_stock(request, product_id):
                 messages.error(request, "Invalid action.")
                 return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
 
+            # Create an InventoryTransaction
+            InventoryTransaction.objects.create(
+                product=product,
+                quantity=quantity if action == 'add' else -quantity,
+                transaction_type=action,
+                user=request.user
+            )
+
             product.save()
             return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
         else:
@@ -176,3 +184,17 @@ def adjust_stock(request, product_id):
             return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
     
     return redirect('inventory:product_list')
+
+@login_required
+def inventory_transaction_report(request):
+    transaction_type = request.GET.get('transaction_type', '')
+    transactions = InventoryTransaction.objects.all().order_by('-date')
+
+    if transaction_type:
+        transactions = transactions.filter(transaction_type=transaction_type)
+
+    return render(request, 'Inventory/inventory_transaction_report.html', {
+        'transactions': transactions,
+        'transaction_type': transaction_type,
+        'transaction_type_choices': TRANSACTION_TYPE_CHOICES,
+    })

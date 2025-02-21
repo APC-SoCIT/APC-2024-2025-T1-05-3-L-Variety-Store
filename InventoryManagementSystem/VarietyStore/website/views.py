@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseBadRequest
-from Inventory.models import Product
+from Inventory.models import Product, InventoryTransaction  # Import the InventoryTransaction model
 from Sales.models import Cart, CartItem
 from django.db.models import Sum
 
+@login_required
 def home(request):
     products = Product.objects.filter(product_status=True)
     categorized_products = {}
@@ -23,9 +24,15 @@ def home(request):
     for category in category_list:
         category['count'] = len(categorized_products.get(category['name'], []))
     
+    # Updated product grouping logic to include ALL products in each category
+    products_by_category = {}
+    for cat_code, cat_name in Product.CATEGORY_CHOICES:
+        products_by_category[cat_code] = Product.objects.filter(product_category=cat_code)
+
     context = {
         'categorized_products': categorized_products,
         'category_list': category_list,
+        'products_by_category': products_by_category,
     }
     return render(request, 'website/homepage.html', context)
 
@@ -38,6 +45,14 @@ def add_to_cart(request, product_id):
         if not created:
             cart_item.quantity += 1
             cart_item.save()
+        
+        # Log the inventory transaction
+        InventoryTransaction.objects.create(
+            product=product,
+            quantity=-1,  # Decrease in inventory
+            transaction_type='sale'
+        )
+        
         return JsonResponse({'product_name': product.product_name})
     else:
         return HttpResponseBadRequest("Invalid request method")
@@ -48,6 +63,14 @@ def remove_from_cart(request, product_id):
         cart = get_object_or_404(Cart, user=request.user)
         cart_item = get_object_or_404(CartItem, cart=cart, product__product_id=product_id)
         cart_item.delete()
+        
+        # Log the inventory transaction
+        InventoryTransaction.objects.create(
+            product=cart_item.product,
+            quantity=cart_item.quantity,  # Increase in inventory
+            transaction_type='adjustment'
+        )
+        
         return JsonResponse({'success': True})
     else:
         return HttpResponseBadRequest("Invalid request method")

@@ -70,24 +70,7 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment #{self.pk} for Order #{self.order.pk}"
 
-# INVENTORY TRANSACTION MODEL
-TRANSACTION_TYPE_CHOICES = [
-    ('sale', 'Sale'),
-    ('restock', 'Restock'),
-    ('adjustment', 'Adjustment'),
-]
 
-class InventoryTransaction(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()  # negative numbers for sales, positive for restock
-    transaction_type = models.CharField(max_length=50, choices=TRANSACTION_TYPE_CHOICES)
-    date = models.DateTimeField(auto_now_add=True)
-    # Either linked to a user (for online sales/pass through cashier) or explicitly to a cashier/inventory manager
-    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-                                related_name='inventory_transactions')
-
-    def __str__(self):
-        return f"{self.transaction_type} of {self.product} ({self.quantity}) on {self.date}"
     
 class Cart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

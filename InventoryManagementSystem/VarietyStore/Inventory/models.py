@@ -4,8 +4,10 @@ from barcode.writer import ImageWriter
 from io import BytesIO
 from django.core.files.base import ContentFile
 from PIL import Image
+from django.conf import settings
 from django.utils.crypto import get_random_string
 import uuid
+from django.contrib.auth.models import User
 
 
 # Supplier Information Model
@@ -74,8 +76,30 @@ class Product(models.Model):
             self.generate_barcode()  # Generate the barcode before saving
         super().save(*args, **kwargs)
 
+    def adjust_quantity(self, quantity):
+        self.product_quantity += quantity
+        self.save()
+
     def __str__(self):
         return self.product_name
 
+# INVENTORY TRANSACTION MODEL
+TRANSACTION_TYPE_CHOICES = [
+    ('sale', 'Sale'),
+    ('restock', 'Restock'),
+    ('adjustment', 'Adjustment'),
+]
 
+class InventoryTransaction(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()  # negative numbers for sales, positive for restock
+    transaction_type = models.CharField(max_length=50, choices=TRANSACTION_TYPE_CHOICES)
+    date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='inventory_transactions')
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.product.adjust_quantity(self.quantity)
+
+    def __str__(self):
+        return f"{self.transaction_type} of {self.product} ({self.quantity}) on {self.date}"
