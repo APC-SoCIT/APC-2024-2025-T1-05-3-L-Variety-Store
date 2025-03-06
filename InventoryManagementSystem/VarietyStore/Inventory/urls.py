@@ -17,6 +17,8 @@ urlpatterns = [
     path('products/gallery/', views.product_gallery, name='product_gallery'),
     path('products/adjust_stock/<int:product_id>/', views.adjust_stock, name='adjust_stock'),
     path('inventory-transactions/', views.inventory_transaction_report, name='inventory_transaction_report'),
+    path('orders/', views.orders, name='orders'),
+    path('orders/<int:order_id>/update-status/', views.update_order_status, name='update_order_status'),
     path('generate-weekly-report/', views.generate_weekly_report_view, name='generate_weekly_report'),
     path('weekly-report/', views.weekly_report_view, name='weekly_report'),
 ]

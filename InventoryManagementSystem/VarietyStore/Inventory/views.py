@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Supplier, InventoryTransaction, TRANSACTION_TYPE_CHOICES, WeeklyReport
+from Sales.models import Order, ORDER_STATUS_CHOICES, ORDER_TYPE_CHOICES
 from .forms import ProductForm, SupplierForm, AdjustStockForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,9 @@ from .utils import generate_weekly_report  # Import the function here
 from accounts.decorators import admin_required, inventory_manager_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+import json
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 def format_price(value, currency='PHP'):
     if value is None:
@@ -371,27 +375,131 @@ def inventory_transaction_report(request):
 @login_required
 @inventory_manager_required
 def weekly_report_view(request):
-    reports = WeeklyReport.objects.all().order_by('-start_date')
-    total_cost_price = sum(report.total_losses for report in reports)  # Calculate total cost price
-    return render(request, 'Inventory/weekly_report.html', {
+    # Get date range from request, default to last 7 days
+    end_date = request.GET.get('end_date')
+    start_date = request.GET.get('start_date')
+    
+    # Convert string dates to datetime objects if provided
+    if end_date:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+    else:
+        end_date = timezone.now()
+    
+    if start_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0)
+    else:
+        start_date = end_date - timedelta(days=7)
+
+    # Get reports within the date range
+    reports = WeeklyReport.objects.filter(
+        start_date__gte=start_date,
+        end_date__lte=end_date
+    ).order_by('-start_date')
+    
+    total_cost_price = sum(report.total_losses for report in reports)
+
+    context = {
         'reports': reports,
-        'total_cost_price': total_cost_price,  # Pass total cost price to the template
-    })
+        'total_cost_price': total_cost_price,
+        'start_date': start_date.strftime('%Y-%m-%d'),
+        'end_date': end_date.strftime('%Y-%m-%d'),
+    }
+    return render(request, 'Inventory/weekly_report.html', context)
 
 @login_required
 @inventory_manager_required
 def generate_weekly_report_view(request):
+    from datetime import datetime
+    
     try:
+        # Get date range from request
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        
+        if not start_date or not end_date:
+            messages.error(request, "Please provide both start and end dates.")
+            return redirect('inventory:weekly_report')
+        
+        # Convert string dates to datetime objects
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+        
         # Get the user's profile
         user_profile = request.user.profile
 
-        # Generate the report and associate it with the user
-        report = generate_weekly_report()
+        # Generate the report for the specified date range
+        report = generate_weekly_report(start_date=start_date, end_date=end_date)
         report.generated_by = user_profile
         report.save()
 
-        messages.success(request, "Weekly report generated successfully.")
+        messages.success(request, "Report generated successfully.")
+    except ValueError:
+        messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
     except Exception as e:
         messages.error(request, f"Error generating report: {str(e)}")
     
     return redirect('inventory:weekly_report')
+
+@login_required
+@inventory_manager_required
+def orders(request):
+    # Get filter parameters
+    order_type = request.GET.get('order_type', '')
+    order_status = request.GET.get('order_status', '')
+    search_query = request.GET.get('search', '')
+
+    # Start with all orders
+    orders = Order.objects.select_related(
+        'user',
+        'cashier'
+    ).order_by('-order_date')
+
+    # Apply filters
+    if order_type:
+        orders = orders.filter(order_type=order_type)
+    if order_status:
+        orders = orders.filter(order_status=order_status)
+    if search_query:
+        orders = orders.filter(
+            Q(user__username__icontains=search_query) |
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query)
+        )
+
+    context = {
+        'orders': orders,
+        'order_types': ORDER_TYPE_CHOICES,
+        'order_statuses': ORDER_STATUS_CHOICES,
+        'current_type': order_type,
+        'current_status': order_status,
+        'search_query': search_query,
+    }
+    return render(request, 'Inventory/orders.html', context)
+
+@login_required
+@inventory_manager_required
+def update_order_status(request, order_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+    
+    try:
+        order = Order.objects.get(id=order_id)
+        data = json.loads(request.body)
+        new_status = data.get('status')
+        
+        if new_status not in dict(ORDER_STATUS_CHOICES):
+            return JsonResponse({'error': 'Invalid status'}, status=400)
+        
+        order.order_status = new_status
+        order.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Order status updated to {order.get_order_status_display()}'
+        })
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Order not found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -83,8 +83,8 @@
             <tr>
                 <th>Name</th>
                 <th>Category</th>
-                <th>Price</th>
-                <th>Cost Price</th>
+                <th>Store Price</th>
+                <th>Supplier Price</th>
                 <th>Quantity</th>
                 <th>Suppliers</th>
                 <th>Barcode</th>
@@ -129,6 +129,56 @@
     </table>
 </div>
 
+<!-- Adjust Stock Modal -->
+<div class="modal fade" id="adjustStockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adjust Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Product Search -->
+                <div class="mb-3">
+                    <label for="product_search" class="form-label">Search Product:</label>
+                    <input type="text" class="form-control" id="product_search" placeholder="Enter product name or barcode...">
+                    <div id="product_suggestions" class="list-group mt-2" style="display: none; position: absolute; z-index: 1000; width: 95%;"></div>
+                </div>
+
+                <!-- Product Details (initially hidden) -->
+                <div id="product_details" style="display: none;">
+                    <div class="mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <p class="mb-1"><strong>Current Stock:</strong> <span id="current_stock_display"></span></p>
+                                <p class="mb-1"><strong>Barcode:</strong> <span id="barcode_display"></span></p>
+                                <p class="mb-1"><strong>Store Price:</strong> ₱<span id="store_price_display"></span></p>
+                                <p class="mb-1"><strong>Supplier Price:</strong> ₱<span id="supplier_price_display"></span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="adjustStockForm" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" id="selected_product_id" name="product_id">
+                        <input type="hidden" id="transaction_type" name="transaction_type">
+                        
+                        <div class="mb-3">
+                            <label for="new_stock" class="form-label">Quantity:</label>
+                            <input type="number" class="form-control" id="new_stock" name="new_stock" min="1" required>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success" onclick="setTransactionType('ADD')">Add Stock</button>
+                            <button type="submit" class="btn btn-danger" onclick="setTransactionType('REMOVE')">Remove Stock</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     .btn-group .btn {
         margin-right: 5px;
@@ -163,7 +213,9 @@ let products = [
         id: {{ product.product_id }},
         name: "{{ product.product_name }}",
         barcode: "{{ product.product_barcode }}",
-        stock: {{ product.product_quantity }}
+        stock: {{ product.product_quantity }},
+        store_price: {{ product.product_price }},
+        supplier_price: {{ product.cost_price }}
     },
     {% endfor %}
 ];
@@ -175,6 +227,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const productDetails = document.getElementById('product_details');
     const currentStockDisplay = document.getElementById('current_stock_display');
     const barcodeDisplay = document.getElementById('barcode_display');
+    const storePriceDisplay = document.getElementById('store_price_display');
+    const supplierPriceDisplay = document.getElementById('supplier_price_display');
     const adjustStockForm = document.getElementById('adjustStockForm');
 
     productSearch.addEventListener('input', function() {
@@ -199,9 +253,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedProductId.value = product.id;
                 currentStockDisplay.textContent = product.stock;
                 barcodeDisplay.textContent = product.barcode;
+                storePriceDisplay.textContent = product.store_price;
+                supplierPriceDisplay.textContent = product.supplier_price;
                 productDetails.style.display = 'block';
                 productSuggestions.style.display = 'none';
-                adjustStockForm.action = `/inventory/adjust-stock/${product.id}/`;
+                adjustStockForm.action = `{% url 'inventory:adjust_stock' 0 %}`.replace('0', product.id);
             });
             productSuggestions.appendChild(div);
         });
