@@ -1,80 +1,147 @@
 {% extends "Inventory/base.html" %}
 {% load widget_tweaks %}
+{% load custom_filters %}
 
 {% block title %}Product Gallery{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Product Gallery</h2>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <!-- Search Bar -->
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" placeholder="Search products..." 
+                                       value="{{ search_query }}">
+                                <button class="btn btn-outline-secondary" type="submit">Search</button>
+                            </div>
+                        </div>
 
+                        <!-- Category Filter -->
+                        <div class="col-md-3">
+                            <select name="category" class="form-select" onchange="this.form.submit()">
+                                <option value="">All Categories</option>
+                                {% for cat_value, cat_label in categories %}
+                                    <option value="{{ cat_value }}" {% if cat_value == current_category %}selected{% endif %}>
+                                        {{ cat_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Sort Options -->
+                        <div class="col-md-3">
+                            <select name="sort_by" class="form-select" onchange="this.form.submit()">
+                                <option value="">Sort By...</option>
+                                <option value="name_asc" {% if current_sort == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+                                <option value="name_desc" {% if current_sort == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+                                <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price (Low-High)</option>
+                                <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price (High-Low)</option>
+                                <option value="quantity_asc" {% if current_sort == 'quantity_asc' %}selected{% endif %}>Quantity (Low-High)</option>
+                                <option value="quantity_desc" {% if current_sort == 'quantity_desc' %}selected{% endif %}>Quantity (High-Low)</option>
+                            </select>
+                        </div>
+
+                        <!-- Reset Filters -->
+                        <div class="col-md-2">
+                            <a href="{% url 'inventory:product_gallery' %}" class="btn btn-secondary w-100">Reset Filters</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if user.profile.role.name in 'Admin,Inventory Manager'|split:',' %}
     <div class="mb-4">
         <a href="{% url 'inventory:product_create' %}" class="btn btn-success me-2">Add Product</a>
         <a href="{% url 'inventory:product_list' %}" class="btn btn-primary">Switch to List View</a>
     </div>
+    {% endif %}
 
     {% for category, products in categorized_products.items %}
         {% if products|length > 0 %}
             <h3>{{ category }}</h3>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2 mb-4">
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 mb-4">
                 {% for product in products %}
-                <div class="col">
-                    <div class="card h-100" style="max-width: 200px; margin: auto;">
+                <div class="col d-flex justify-content-center">
+                    <div class="card product-card">
                         {% if product.product_image %}
-                            <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_name }}" style="height: 120px; object-fit: cover;">
+                            <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.product_name }}">
                         {% else %}
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 120px;">
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center">
                                 <span class="text-muted">No Image</span>
                             </div>
                         {% endif %}
-                        <div class="card-body" style="padding: 0.5rem;">
-                            <h5 class="card-title" style="font-size: 0.9rem;">{{ product.product_name }}</h5>
-                            <p class="card-text text-truncate" style="font-size: 0.8rem;">{{ product.product_description }}</p>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.product_name }}</h5>
+                            <p class="card-text text-truncate">{{ product.product_description }}</p>
                             <p class="card-text">
-                                <small class="text-muted">Category: {{ product.product_category }}</small>
+                                <small class="text-muted">Category: {{ product.get_product_category_display }}</small>
                             </p>
                             <p class="card-text">
-                                <strong style="font-size: 0.9rem;">Price: ₱{{ product.product_price }}</strong><br>
-                                <strong style="font-size: 0.9rem;">Cost Price: ₱{{ product.cost_price }}</strong>
+                                <strong>Price: ₱{{ product.product_price }}</strong><br>
+                                <strong>Cost Price: ₱{{ product.cost_price }}</strong>
                                 <span class="badge {% if product.product_quantity > 0 %}bg-success{% else %}bg-danger{% endif %}">
                                     Stock: {{ product.product_quantity }}
                                 </span>
                             </p>
                         </div>
-                        <div class="card-footer bg-transparent border-top-0" style="padding: 0.5rem;">
+                        {% if user.profile.role.name in 'Admin,Inventory Manager'|split:',' %}
+                        <div class="card-footer bg-transparent">
                             <div class="d-flex justify-content-between">
                                 <a href="{% url 'inventory:product_edit' product.product_id %}" class="btn btn-warning btn-sm">Edit</a>
+                                {% if user.profile.role.name == 'Admin' %}
                                 <a href="{% url 'inventory:product_delete' product.product_id %}" class="btn btn-danger btn-sm">Delete</a>
+                                {% endif %}
                                 <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#adjustStockModal{{ product.product_id }}">Adjust Stock</button>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
 
-                <!-- Adjust Stock Modal -->
+                <!-- Adjust Stock Modal for each product -->
                 <div class="modal fade" id="adjustStockModal{{ product.product_id }}" tabindex="-1" aria-labelledby="adjustStockModalLabel{{ product.product_id }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="adjustStockModalLabel{{ product.product_id }}">Adjust Stock for {{ product.product_name }}</h5>
+                                <h5 class="modal-title">Adjust Stock - {{ product.product_name }}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="{% url 'inventory:adjust_stock' product.product_id %}">
+                                <form method="POST" class="adjust-stock-form" action="{% url 'inventory:adjust_stock' product_id=product.product_id %}">
                                     {% csrf_token %}
+                                    
+                                    <!-- Product Details Display -->
                                     <div class="mb-3">
-                                        <label for="action{{ product.product_id }}" class="form-label">Action:</label>
-                                        <div>
-                                            <input type="radio" id="add{{ product.product_id }}" name="transaction_type" value="ADD" required>
-                                            <label for="add{{ product.product_id }}">Add Stock</label>
-                                            <input type="radio" id="remove{{ product.product_id }}" name="transaction_type" value="REMOVE" required>
-                                            <label for="remove{{ product.product_id }}">Remove Stock</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <small class="form-text text-muted">Current Stock: {{ product.product_quantity }}</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small class="form-text text-muted">Barcode: {{ product.product_barcode }}</small>
+                                            </div>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Quantity -->
                                     <div class="mb-3">
-                                        <label for="new_stock{{ product.product_id }}" class="form-label">Quantity:</label>
+                                        <label for="new_stock{{ product.product_id }}" class="form-label small-label">Quantity:</label>
                                         <input type="number" class="form-control" id="new_stock{{ product.product_id }}" name="new_stock" min="1" required>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    
+                                    <!-- Transaction Type (Hidden) -->
+                                    <input type="hidden" name="transaction_type" class="transaction-type" value="">
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex justify-content-between">
+                                        <button type="submit" class="btn btn-success" onclick="setTransactionType(this, 'ADD')">Add Stock</button>
+                                        <button type="submit" class="btn btn-danger" onclick="setTransactionType(this, 'REMOVE')">Remove Stock</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -83,36 +150,115 @@
                 {% endfor %}
             </div>
         {% endif %}
+    {% empty %}
+        <div class="alert alert-info">No products found.</div>
     {% endfor %}
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle form submission for all adjust stock forms
+    document.querySelectorAll('.adjust-stock-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    const modal = bootstrap.Modal.getInstance(this.closest('.modal'));
+                    modal.hide();
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'An error occurred while adjusting stock.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing your request.');
+            });
+        });
+    });
+});
+
+function setTransactionType(button, type) {
+    const form = button.closest('form');
+    form.querySelector('.transaction-type').value = type;
+}
+</script>
+
 <style>
-    .card {
+    .product-card {
+        width: 100%;
+        max-width: 220px;
+        height: 100%;
         transition: transform 0.2s ease-in-out;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin: 0 auto;
     }
     
-    .card:hover {
+    .product-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
 
-    .card-title {
-        font-size: 0.9rem;
+    .product-card .card-img-top {
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .product-card .card-img-top.bg-light {
+        height: 150px;
+    }
+
+    .product-card .card-body {
+        padding: 1rem;
+    }
+
+    .product-card .card-title {
+        font-size: 1rem;
         font-weight: bold;
+        margin-bottom: 0.5rem;
+        height: 2.4rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
     }
 
-    .badge {
-        font-size: 0.8rem;
+    .product-card .card-text {
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
     }
 
-    .btn-sm {
+    .product-card .badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .product-card .btn-sm {
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
     }
 
-    .small-label {
-        font-size: 0.8rem;
+    .product-card .card-footer {
+        padding: 0.75rem;
+        background-color: transparent;
+    }
+
+    @media (max-width: 576px) {
+        .product-card {
+            max-width: 180px;
+        }
     }
 </style>
 {% endblock %} 

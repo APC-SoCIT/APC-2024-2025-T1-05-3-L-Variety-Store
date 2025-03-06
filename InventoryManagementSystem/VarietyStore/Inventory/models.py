@@ -99,14 +99,33 @@ class InventoryTransaction(models.Model):
     quantity = models.IntegerField()  # negative numbers for sales, positive for restock
     transaction_type = models.CharField(max_length=50, choices=TRANSACTION_TYPE_CHOICES)
     date = models.DateTimeField(auto_now_add=True)
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='inventory_transactions')  # Ensure this is correct
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='inventory_transactions')
+    cost_at_transaction = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Cost price at time of transaction
+    price_at_transaction = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Selling price at time of transaction
+    notes = models.TextField(blank=True, null=True)  # For any additional information
 
     def save(self, *args, **kwargs):
+        # Store the cost and price at the time of transaction
+        self.cost_at_transaction = self.product.cost_price
+        self.price_at_transaction = self.product.product_price
+
+        # Add notes about who made the change
+        if self.user_profile:
+            user_info = f"{self.user_profile.user.username} ({self.user_profile.first_name} {self.user_profile.last_name})"
+        else:
+            user_info = "Unknown user"
+
+        self.notes = f"Transaction by {user_info} on {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
         super().save(*args, **kwargs)
         self.product.adjust_quantity(self.quantity)
 
     def __str__(self):
-        return f"{self.transaction_type} of {self.product} ({self.quantity}) on {self.date} by {self.user_profile.user.username if self.user_profile else 'Unknown'}"
+        user_info = f"by {self.user_profile.user.username}" if self.user_profile else "by Unknown"
+        return f"{self.transaction_type} of {self.product} ({self.quantity}) on {self.date} {user_info}"
+
+    class Meta:
+        ordering = ['-date']  # Most recent transactions first
 
 class WeeklyReport(models.Model):
     start_date = models.DateField()
@@ -115,6 +134,12 @@ class WeeklyReport(models.Model):
     total_losses = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total_profit_or_loss = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)  # For storing transaction summaries
+    generated_by = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        ordering = ['-start_date']
+        get_latest_by = 'start_date'
 
     def __str__(self):
-        return f"Report from {self.start_date} to {self.end_date}"
+        return f"Report from {self.start_date} to {self.end_date} (Profit/Loss: ₱{self.total_profit_or_loss})"

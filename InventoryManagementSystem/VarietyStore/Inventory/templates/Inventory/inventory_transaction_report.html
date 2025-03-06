@@ -33,7 +33,9 @@
                 <th>Quantity</th>
                 <th>Transaction Type</th>
                 <th>User</th>
-                <th>Cost Price</th>
+                <th>Cost at Transaction</th>
+                <th>Price at Transaction</th>
+                <th>Notes</th>
             </tr>
         </thead>
         <tbody>
@@ -44,16 +46,39 @@
                 <td>{{ transaction.quantity }}</td>
                 <td>{{ transaction.get_transaction_type_display }}</td>
                 <td>
-                    {% if transaction.user and transaction.user.profile %}
-                        {{ transaction.user.profile.first_name }} {{ transaction.user.profile.last_name }}
+                    {% if transaction.user_profile %}
+                        {{ transaction.user_profile.first_name }} {{ transaction.user_profile.last_name }}
+                        ({{ transaction.user_profile.user.username }})
                     {% else %}
                         N/A
                     {% endif %}
                 </td>
-                <td>₱{{ transaction.product.cost_price }}</td>
+                <td>₱{{ transaction.cost_at_transaction }}</td>
+                <td>₱{{ transaction.price_at_transaction }}</td>
+                <td>
+                    <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#notes{{ forloop.counter }}" aria-expanded="false">
+                        View Notes
+                    </button>
+                    <div class="collapse" id="notes{{ forloop.counter }}">
+                        <div class="card card-body mt-2">
+                            {{ transaction.notes|default:"No notes available" }}
+                        </div>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<style>
+    .table td {
+        vertical-align: middle;
+    }
+    .card-body {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+</style>
 {% endblock %}
