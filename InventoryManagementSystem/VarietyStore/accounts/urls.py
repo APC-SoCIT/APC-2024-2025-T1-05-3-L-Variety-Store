@@ -19,4 +19,5 @@ urlpatterns = [
     path('edit_user/<int:user_id>/', views.edit_user, name='edit_user'),
     path('reset_password_email/<int:user_id>/', views.reset_password_email, name='reset_password_email'),
     path('reset_password_direct/<int:user_id>/', views.reset_password_direct, name='reset_password_direct'),
+    path('profile/<int:user_id>/', views.user_profile, name='user_profile'),
 ]

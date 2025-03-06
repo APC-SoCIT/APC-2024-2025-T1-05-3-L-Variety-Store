@@ -1,72 +1,33 @@
 <!-- filepath: /d:/abc123/APC-2024-2025-T1-05-3-L-Variety-Store/InventoryManagementSystem/VarietyStore/Inventory/templates/Inventory/product_list.html -->
 {% extends "Inventory/base.html" %}
 {% load widget_tweaks %}
+{% load custom_filters %}
 
 {% block title %}Product List{% endblock %}
 
 {% block header %}
-<div class="d-flex justify-content-between align-items-center">
-    <h2 class="me-2"></i> Product List</h2>
-    <div>
-        <a href="{% url 'inventory:product_create' %}" class="btn btn-success me-2"><i class="fas fa-plus"></i> Add Product</a>
-        <a href="{% url 'inventory:product_gallery' %}" class="btn btn-primary me-2"><i class="fas fa-th"></i> Switch to Gallery View</a>
-        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#adjustStockModal"><i class="fas fa-arrow-up"></i> Adjust Stock</button>
-    </div>
-</div>
-
-<!-- Adjust Stock Modal -->
-<div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Adjust Stock</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" id="adjustStockForm" action="">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="product_search" class="form-label small-label">Search Product:</label>
-                        <input type="text" class="form-control" id="product_search" placeholder="Type to search products..." autocomplete="off">
-                        <input type="hidden" id="selected_product_id" name="product_id">
-                        <div id="product_suggestions" class="list-group mt-2" style="display: none; position: absolute; z-index: 1000; width: 95%;"></div>
-                    </div>
-                    
-                    <!-- Product Details Display -->
-                    <div id="product_details" class="mb-3" style="display: none;">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <small class="form-text text-muted">Current Stock: <span id="current_stock_display"></span></small>
-                            </div>
-                            <div class="col-md-6">
-                                <small class="form-text text-muted">Barcode: <span id="barcode_display"></span></small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Quantity -->
-                    <div class="mb-3">
-                        <label for="new_stock" class="form-label small-label">Quantity:</label>
-                        <input type="number" class="form-control" id="new_stock" name="new_stock" min="1" required>
-                    </div>
-                    
-                    <!-- Transaction Type (Hidden) -->
-                    <input type="hidden" name="transaction_type" id="transaction_type" value="">
-                    
-                    <!-- Action Buttons -->
-                    <div class="d-flex justify-content-between">
-                        <button type="submit" class="btn btn-success" onclick="setTransactionType('ADD')">Add Stock</button>
-                        <button type="submit" class="btn btn-danger" onclick="setTransactionType('REMOVE')">Remove Stock</button>
-                    </div>
-                </form>
-            </div>
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">Products List</h2>
+        {% if user.profile.role.name in 'Admin,Inventory Manager'|split:',' %}
+        <div>
+            <a href="{% url 'inventory:product_create' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
+            <a href="{% url 'inventory:product_gallery' %}" class="btn btn-primary">
+                <i class="fas fa-th"></i> Gallery View
+            </a>
+            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#adjustStockModal">
+                <i class="fas fa-arrow-up"></i> Adjust Stock
+            </button>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container-fluid">
     <!-- Search and Filter Controls -->
     <div class="row mb-4">
         <div class="col-md-12">

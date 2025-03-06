@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib import messages
 from .models import Role, UserProfile
@@ -9,6 +9,11 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from .forms import UserRegistrationForm, UserCreationForm, UserEditForm, UserProfileForm
 from .models import Role, UserProfile
+from Inventory.models import InventoryTransaction
+from Sales.models import Sale
+from django.db.models import Count, Sum
+from accounts.decorators import admin_required
+from django.db.models import Q
 
 def login_view(request):
     if request.method == 'POST':
@@ -49,24 +54,47 @@ def is_admin(user):
     return user.is_superuser
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
+@admin_required
 def manage_roles(request):
-    if request.method == "POST":
-        user_id = request.POST.get("user_id")
-        role_id = request.POST.get("role_id")
-
-        user = User.objects.get(id=user_id)
-        role = Role.objects.get(id=role_id)
-
-        user_profile, _ = UserProfile.objects.get_or_create(user=user)
-        user_profile.role = role
-        user_profile.save()
-
-        return redirect('accounts:manage_roles') 
-
-    users = User.objects.all()
+    # Get all users and roles
+    users = User.objects.select_related('profile__role').all()
     roles = Role.objects.all()
-    return render(request, "accounts/manage_roles.html", {"users": users, "roles": roles})
+
+    # Handle search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        users = users.filter(
+            Q(username__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(profile__first_name__icontains=search_query) |
+            Q(profile__last_name__icontains=search_query)
+        )
+
+    # Handle role filtering
+    selected_role = request.GET.get('role', '')
+    if selected_role:
+        users = users.filter(profile__role_id=selected_role)
+
+    # Handle sorting
+    sort_by = request.GET.get('sort_by', '')
+    if sort_by == 'username_asc':
+        users = users.order_by('username')
+    elif sort_by == 'username_desc':
+        users = users.order_by('-username')
+    elif sort_by == 'date_joined':
+        users = users.order_by('-date_joined')
+    else:
+        users = users.order_by('username')  # Default sorting
+
+    context = {
+        'users': users,
+        'roles': roles,
+        'search_query': search_query,
+        'selected_role': selected_role,
+        'current_sort': sort_by,
+    }
+
+    return render(request, 'accounts/manage_roles.html', context)
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -159,3 +187,49 @@ def create_user(request):
     else:
         form = UserCreationForm()
     return render(request, 'accounts/create_user.html', {'form': form})
+
+@login_required
+def user_profile(request, user_id):
+    # Get the user profile
+    user_profile = get_object_or_404(UserProfile, user_id=user_id)
+    
+    # Check if the user has permission to view this profile
+    if request.user != user_profile.user and not request.user.profile.role.name == 'Admin':
+        messages.error(request, "You don't have permission to view this profile.")
+        return redirect('inventory:product_list')
+    
+    # Get inventory transactions
+    inventory_transactions = InventoryTransaction.objects.filter(
+        user_profile=user_profile
+    ).select_related('product').order_by('-date')[:10]  # Get last 10 transactions
+    
+    inventory_transactions_count = InventoryTransaction.objects.filter(
+        user_profile=user_profile
+    ).count()
+    
+    # Get sales data
+    sales = Sale.objects.filter(
+        user_profile=user_profile
+    ).order_by('-date')[:10]  # Get last 10 sales
+    
+    sales_count = Sale.objects.filter(
+        user_profile=user_profile
+    ).count()
+    
+    total_sales_amount = Sale.objects.filter(
+        user_profile=user_profile,
+        status='completed'
+    ).aggregate(
+        total=Sum('total_amount')
+    )['total'] or 0
+    
+    context = {
+        'user_profile': user_profile,
+        'inventory_transactions': inventory_transactions,
+        'inventory_transactions_count': inventory_transactions_count,
+        'sales': sales,
+        'sales_count': sales_count,
+        'total_sales_amount': total_sales_amount,
+    }
+    
+    return render(request, 'accounts/user_profile.html', context)

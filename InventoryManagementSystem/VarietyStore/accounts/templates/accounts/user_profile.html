@@ -1,0 +1,238 @@
+{% extends "Inventory/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}User Profile - {{ user_profile.user.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- User Information Card -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">User Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar-circle mb-3">
+                            <span class="initials">{{ user_profile.user.username|make_list|first|upper }}</span>
+                        </div>
+                        <h4>{{ user_profile.user.username }}</h4>
+                        <span class="badge bg-info">{{ user_profile.role.name }}</span>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Full Name:</strong><br>
+                            {{ user_profile.first_name }} {{ user_profile.last_name }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Email:</strong><br>
+                            {{ user_profile.user.email }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Contact Number:</strong><br>
+                            {{ user_profile.contact_number|default:"Not provided" }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Address:</strong><br>
+                            {{ user_profile.address|default:"Not provided" }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Joined:</strong><br>
+                            {{ user_profile.user.date_joined|date:"F d, Y" }}
+                        </li>
+                    </ul>
+                    {% if request.user == user_profile.user or request.user.profile.role.name == 'Admin' %}
+                    <div class="card-footer bg-transparent text-center">
+                        <a href="{% url 'accounts:edit_user' user_profile.user.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'accounts:password_reset' %}" class="btn btn-secondary">
+                            <i class="fas fa-key"></i> Change Password
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Activity Summary -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Activity Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3>{{ inventory_transactions_count }}</h3>
+                                <p>Inventory Transactions</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3>{{ sales_count }}</h3>
+                                <p>Sales Processed</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3>{{ total_sales_amount|floatformat:2 }}</h3>
+                                <p>Total Sales Amount</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Tabs -->
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#inventory" role="tab">
+                                Inventory Activity
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#sales" role="tab">
+                                Sales History
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Inventory Transactions Tab -->
+                        <div class="tab-pane fade show active" id="inventory" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Product</th>
+                                            <th>Type</th>
+                                            <th>Quantity</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for transaction in inventory_transactions %}
+                                        <tr>
+                                            <td>{{ transaction.date|date:"M d, Y H:i" }}</td>
+                                            <td>{{ transaction.product.product_name }}</td>
+                                            <td>
+                                                <span class="badge {% if transaction.transaction_type == 'ADD' %}bg-success
+                                                      {% elif transaction.transaction_type == 'REMOVE' %}bg-danger
+                                                      {% else %}bg-info{% endif %}">
+                                                    {{ transaction.transaction_type }}
+                                                </span>
+                                            </td>
+                                            <td>{{ transaction.quantity }}</td>
+                                            <td>{{ transaction.notes|default:"-" }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">No inventory transactions found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Sales History Tab -->
+                        <div class="tab-pane fade" id="sales" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Invoice #</th>
+                                            <th>Items</th>
+                                            <th>Total Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for sale in sales %}
+                                        <tr>
+                                            <td>{{ sale.date|date:"M d, Y H:i" }}</td>
+                                            <td>{{ sale.invoice_number }}</td>
+                                            <td>{{ sale.items_count }}</td>
+                                            <td>₱{{ sale.total_amount|floatformat:2 }}</td>
+                                            <td>
+                                                <span class="badge {% if sale.status == 'completed' %}bg-success
+                                                      {% elif sale.status == 'pending' %}bg-warning
+                                                      {% else %}bg-danger{% endif %}">
+                                                    {{ sale.status|title }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">No sales history found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.initials {
+    font-size: 40px;
+    color: white;
+    font-weight: bold;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    border-bottom: 0;
+}
+
+.list-group-item {
+    border-left: 0;
+    border-right: 0;
+}
+
+.badge {
+    font-size: 0.875rem;
+    padding: 0.5em 1em;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    font-weight: 500;
+}
+</style>
+{% endblock %} 
