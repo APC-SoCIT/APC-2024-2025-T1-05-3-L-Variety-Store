@@ -1,9 +1,10 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 app_name = 'inventory'
 
 urlpatterns = [
+    path('accounts/', include('accounts.urls')),
     path('products/', views.product_list, name='product_list'),
     path('products/create/', views.product_create_or_edit, name='product_create'),
     path('products/edit/<int:product_id>/', views.product_create_or_edit, name='product_edit'),
@@ -16,4 +17,6 @@ urlpatterns = [
     path('products/gallery/', views.product_gallery, name='product_gallery'),
     path('products/adjust_stock/<int:product_id>/', views.adjust_stock, name='adjust_stock'),
     path('inventory-transactions/', views.inventory_transaction_report, name='inventory_transaction_report'),
+    path('generate-weekly-report/', views.generate_weekly_report_view, name='generate_weekly_report'),
+    path('weekly-report/', views.weekly_report_view, name='weekly_report'),
 ]

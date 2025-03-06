@@ -8,6 +8,8 @@ from django.conf import settings
 from django.utils.crypto import get_random_string
 import uuid
 from django.contrib.auth.models import User
+from accounts.models import UserProfile  # Import UserProfile
+from django.utils import timezone
 
 
 # Supplier Information Model
@@ -40,7 +42,8 @@ class Product(models.Model):
     product_quantity = models.PositiveIntegerField()
     product_category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, default='Others')
     product_status = models.BooleanField(default=False)
-    product_price = models.DecimalField(max_digits=10, decimal_places=2)
+    product_price = models.DecimalField(max_digits=10, decimal_places=2)  # Selling price
+    cost_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Cost price
     product_barcode = models.CharField(max_length=50, unique=True, blank=True)
     barcode_image = models.ImageField(upload_to='barcodes/', blank=True, null=True)
     product_image = models.ImageField(upload_to='product_images/', blank=True, null=True)
@@ -88,18 +91,30 @@ TRANSACTION_TYPE_CHOICES = [
     ('sale', 'Sale'),
     ('restock', 'Restock'),
     ('adjustment', 'Adjustment'),
+    ('ADD', 'Add'),  # New type for adding stock
+    ('REMOVE', 'Remove'),  # New type for removing stock
 ]
-
 class InventoryTransaction(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()  # negative numbers for sales, positive for restock
     transaction_type = models.CharField(max_length=50, choices=TRANSACTION_TYPE_CHOICES)
     date = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='inventory_transactions')
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='inventory_transactions')  # Ensure this is correct
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.product.adjust_quantity(self.quantity)
 
     def __str__(self):
-        return f"{self.transaction_type} of {self.product} ({self.quantity}) on {self.date}"
+        return f"{self.transaction_type} of {self.product} ({self.quantity}) on {self.date} by {self.user_profile.user.username if self.user_profile else 'Unknown'}"
+
+class WeeklyReport(models.Model):
+    start_date = models.DateField()
+    end_date = models.DateField()
+    total_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_losses = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_profit_or_loss = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report from {self.start_date} to {self.end_date}"

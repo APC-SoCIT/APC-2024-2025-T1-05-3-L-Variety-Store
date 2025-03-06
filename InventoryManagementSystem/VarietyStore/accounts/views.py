@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from .forms import UserRegistrationForm
+from .forms import UserRegistrationForm, UserCreationForm, UserEditForm, UserProfileForm
 from .models import Role, UserProfile
 
 def login_view(request):
@@ -91,21 +91,28 @@ def reset_password(request, user_id):
 @user_passes_test(lambda u: u.is_superuser)
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
+    user_profile, _ = UserProfile.objects.get_or_create(user=user)  # Ensure UserProfile exists
+
     if request.method == "POST":
-        user.username = request.POST.get("username")
-        user.email = request.POST.get("email")
-        user.profile.first_name = request.POST.get("first_name")
-        user.profile.last_name = request.POST.get("last_name")
-        role_id = request.POST.get("role_id")
-        role = Role.objects.get(id=role_id)
-        user.profile.role = role
-        user.profile.save()
-        user.save()
-        messages.success(request, "User information updated successfully.")
-        return redirect('accounts:manage_roles')
+        user_form = UserEditForm(request.POST, instance=user)
+        profile_form = UserProfileForm(request.POST, instance=user_profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()  # Save User
+            profile_form.save()  # Save UserProfile
+            messages.success(request, "User information updated successfully.")
+            return redirect('accounts:manage_roles')
+        else:
+            messages.error(request, "Please correct the errors below.")
 
     roles = Role.objects.all()
-    return render(request, 'accounts/edit_user.html', {'user': user, 'roles': roles})
+    return render(request, 'accounts/edit_user.html', {
+        'user': user,
+        'roles': roles,
+        'user_profile': user_profile,
+        'user_form': UserEditForm(instance=user),
+        'profile_form': UserProfileForm(instance=user_profile),
+    })
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -141,6 +148,12 @@ def create_user(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Create UserProfile and assign a default role
+            user_profile = UserProfile.objects.create(user=user)
+            default_role = Role.objects.filter(name='Customer').first()  # Adjust the role name as necessary
+            if default_role:
+                user_profile.role = default_role
+                user_profile.save()
             messages.success(request, "New account created successfully.")
             return redirect('accounts:manage_roles')
     else:

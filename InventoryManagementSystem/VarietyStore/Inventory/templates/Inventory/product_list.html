@@ -57,8 +57,8 @@
                     
                     <!-- Action Buttons -->
                     <div class="d-flex justify-content-between">
-                        <button type="submit" name="action" value="add" class="btn btn-success">Add Stock</button>
-                        <button type="submit" name="action" value="remove" class="btn btn-danger">Remove Stock</button>
+                        <button type="submit" name="transaction_type" value="ADD" class="btn btn-success">Add Stock</button>
+                        <button type="submit" name="transaction_type" value="REMOVE" class="btn btn-danger">Remove Stock</button>
                     </div>
                 </form>
             </div>
@@ -75,6 +75,7 @@
                 <th>Name</th>
                 <th>Category</th>
                 <th>Price</th>
+                <th>Cost Price</th>
                 <th>Quantity</th>
                 <th>Suppliers</th>
                 <th>Barcode</th>
@@ -86,6 +87,7 @@
                 <td>{{ product.product_name }}</td>
                 <td>{{ product.product_category }}</td>
                 <td>₱{{ product.product_price }}</td>
+                <td>₱{{ product.cost_price }}</td>
                 <td>{{ product.product_quantity }}</td>
                 <td>
                     {% if product.suppliers.all %}

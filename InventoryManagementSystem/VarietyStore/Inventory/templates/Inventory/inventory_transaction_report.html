@@ -7,6 +7,11 @@
 <div class="container mt-5">
     <h2>Inventory Transaction Report</h2>
     
+    <!-- Generate Weekly Report Button -->
+    <div class="mb-4">
+        <a href="{% url 'inventory:generate_weekly_report' %}" class="btn btn-success">Generate Weekly Report</a>
+    </div>
+
     <!-- Filter Form -->
     <form method="get" class="mb-4">
         <div class="input-group">
@@ -28,6 +33,7 @@
                 <th>Quantity</th>
                 <th>Transaction Type</th>
                 <th>User</th>
+                <th>Cost Price</th>
             </tr>
         </thead>
         <tbody>
@@ -44,6 +50,7 @@
                         N/A
                     {% endif %}
                 </td>
+                <td>₱{{ transaction.product.cost_price }}</td>
             </tr>
             {% endfor %}
         </tbody>

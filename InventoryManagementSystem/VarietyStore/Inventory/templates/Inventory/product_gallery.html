@@ -34,6 +34,7 @@
                             </p>
                             <p class="card-text">
                                 <strong style="font-size: 0.9rem;">Price: ₱{{ product.product_price }}</strong><br>
+                                <strong style="font-size: 0.9rem;">Cost Price: ₱{{ product.cost_price }}</strong>
                                 <span class="badge {% if product.product_quantity > 0 %}bg-success{% else %}bg-danger{% endif %}">
                                     Stock: {{ product.product_quantity }}
                                 </span>
@@ -63,9 +64,9 @@
                                     <div class="mb-3">
                                         <label for="action{{ product.product_id }}" class="form-label">Action:</label>
                                         <div>
-                                            <input type="radio" id="add{{ product.product_id }}" name="action" value="add" required>
+                                            <input type="radio" id="add{{ product.product_id }}" name="transaction_type" value="ADD" required>
                                             <label for="add{{ product.product_id }}">Add Stock</label>
-                                            <input type="radio" id="remove{{ product.product_id }}" name="action" value="remove" required>
+                                            <input type="radio" id="remove{{ product.product_id }}" name="transaction_type" value="REMOVE" required>
                                             <label for="remove{{ product.product_id }}">Remove Stock</label>
                                         </div>
                                     </div>

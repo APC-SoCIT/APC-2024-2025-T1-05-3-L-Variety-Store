@@ -33,12 +33,13 @@ def home(request):
 @login_required
 def add_to_cart(request, product_id):
     if request.method == 'POST':
-        product = get_object_or_404(Product, product_id=product_id)
         cart, created = Cart.objects.get_or_create(user=request.user)
+        product = get_object_or_404(Product, id=product_id)
+        
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
         if not created:
-            cart_item.quantity += 1
-            cart_item.save()
+            cart_item.quantity += 1  # Increment quantity if item already exists
+        cart_item.save()
         
         # Log the inventory transaction
         InventoryTransaction.objects.create(
@@ -47,9 +48,8 @@ def add_to_cart(request, product_id):
             transaction_type='sale'
         )
         
-        return JsonResponse({'product_name': product.product_name})
-    else:
-        return HttpResponseBadRequest("Invalid request method")
+        return JsonResponse({'product_name': product.product_name, 'quantity': cart_item.quantity})
+    return HttpResponseBadRequest("Invalid request method")
 
 @login_required
 def remove_from_cart(request, product_id):

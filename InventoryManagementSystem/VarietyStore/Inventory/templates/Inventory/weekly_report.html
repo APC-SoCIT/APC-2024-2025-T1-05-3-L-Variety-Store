@@ -1,0 +1,29 @@
+{% extends "Inventory/base.html" %}
+
+{% block content %}
+<h2>Weekly Reports</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Total Earnings</th>
+            <th>Total Losses</th>
+            <th>Total Profit/Loss</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for report in reports %}
+        <tr>
+            <td>{{ report.start_date }}</td>
+            <td>{{ report.end_date }}</td>
+            <td>₱{{ report.total_earnings }}</td>
+            <td>₱{{ report.total_losses }}</td>
+            <td>₱{{ report.total_profit_or_loss }}</td>
+            <td>{{ report.created_at }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %} 

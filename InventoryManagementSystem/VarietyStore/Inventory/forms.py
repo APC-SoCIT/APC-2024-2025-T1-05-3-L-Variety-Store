@@ -17,6 +17,7 @@ class ProductForm(forms.ModelForm):
             'product_quantity',
             'product_category',
             'product_price',
+            'cost_price',
             'barcode_image',
             'product_image',
             'suppliers',

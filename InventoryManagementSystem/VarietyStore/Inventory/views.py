@@ -1,9 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Supplier, InventoryTransaction, TRANSACTION_TYPE_CHOICES
+from .models import Product, Supplier, InventoryTransaction, TRANSACTION_TYPE_CHOICES, WeeklyReport
 from .forms import ProductForm, SupplierForm, AdjustStockForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
+from accounts.models import UserProfile  # Ensure this import is correct
+from django.http import JsonResponse
+from .utils import generate_weekly_report  # Import the function here
 
 def format_price(value, currency='PHP'):
     if value is None:
@@ -48,15 +51,41 @@ def product_list(request):
 def product_create_or_edit(request, product_id=None):
     if product_id:
         product = get_object_or_404(Product, product_id=product_id)
+        original_quantity = product.product_quantity  # Store the original quantity
         form_title = "Edit Product"
     else:
         product = None
+        original_quantity = 0  # No original quantity for new products
         form_title = "Add Product"
 
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             product = form.save(commit=False)  # Don't save M2M yet
+            new_quantity = form.cleaned_data['product_quantity']  # Get the new quantity
+
+            # Adjust stock based on the difference
+            if product_id:  # Only adjust stock if editing an existing product
+                quantity_difference = new_quantity - original_quantity
+                if quantity_difference != 0:
+                    # Check if the new quantity would be negative
+                    if product.product_quantity + quantity_difference < 0:
+                        messages.error(request, "Stock quantity cannot be negative.")
+                        return render(request, 'Inventory/product_form.html', {
+                            'form': form,
+                            'product_form_title': form_title,
+                        })
+
+                    # Create an InventoryTransaction for the adjustment
+                    transaction_type = 'restock' if quantity_difference > 0 else 'sale'
+                    InventoryTransaction.objects.create(
+                        product=product,
+                        quantity=quantity_difference,
+                        transaction_type=transaction_type,
+                        user_profile=UserProfile.objects.get(user=request.user)  # Get the UserProfile for the logged-in user
+                    )
+                    product.adjust_quantity(quantity_difference)  # Adjust product quantity accordingly
+
             product.save()  # Save the instance first
             form.save_m2m()  # Now save the M2M data
             messages.success(request, "Product saved successfully.")
@@ -147,43 +176,31 @@ def product_gallery(request):
 
 @login_required
 def adjust_stock(request, product_id):
-    """Handle adjusting stock for a product."""
     product = get_object_or_404(Product, product_id=product_id)
-    
+
     if request.method == 'POST':
-        form = AdjustStockForm(request.POST)
-        if form.is_valid():
-            action = form.cleaned_data.get('action')
-            quantity = form.cleaned_data.get('new_stock')
+        quantity = int(request.POST.get('new_stock', 0))  # Get the quantity from the form
+        transaction_type = request.POST.get('transaction_type')  # Get the transaction type
 
-            if action == 'add':
-                product.product_quantity += quantity
-                messages.success(request, f'Stock for "{product.product_name}" has been increased by {quantity}.')
-            elif action == 'remove':
-                if quantity > product.product_quantity:
-                    messages.error(request, f'Cannot remove {quantity} units. Only {product.product_quantity} in stock.')
-                    return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
-                product.product_quantity -= quantity
-                messages.success(request, f'Stock for "{product.product_name}" has been decreased by {quantity}.')
-            else:
-                messages.error(request, "Invalid action.")
-                return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
+        # Check if transaction_type is provided
+        if not transaction_type:
+            return JsonResponse({'error': 'Transaction type is required.'}, status=400)
 
-            # Create an InventoryTransaction
-            InventoryTransaction.objects.create(
-                product=product,
-                quantity=quantity if action == 'add' else -quantity,
-                transaction_type=action,
-                user=request.user
-            )
+        # Get the UserProfile for the logged-in user
+        user_profile = UserProfile.objects.get(user=request.user)
 
-            product.save()
-            return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
-        else:
-            messages.error(request, "Invalid input. Please try again.")
-            return redirect(request.META.get('HTTP_REFERER', 'inventory:product_list'))
-    
-    return redirect('inventory:product_list')
+        # Create the InventoryTransaction instance
+        InventoryTransaction.objects.create(
+            product=product,
+            quantity=quantity if transaction_type == "ADD" else -quantity,  # Adjust quantity based on action
+            transaction_type=transaction_type,
+            user_profile=user_profile  # Ensure this is correct
+        )
+
+        # Return a success response
+        return JsonResponse({'success': True, 'message': 'Stock adjusted successfully.'})
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 @login_required
 def inventory_transaction_report(request):
@@ -198,3 +215,19 @@ def inventory_transaction_report(request):
         'transaction_type': transaction_type,
         'transaction_type_choices': TRANSACTION_TYPE_CHOICES,
     })
+
+@login_required
+def weekly_report_view(request):
+    reports = WeeklyReport.objects.all().order_by('-start_date')
+    total_cost_price = sum(report.total_losses for report in reports)  # Calculate total cost price
+    return render(request, 'Inventory/weekly_report.html', {
+        'reports': reports,
+        'total_cost_price': total_cost_price,  # Pass total cost price to the template
+    })
+
+@login_required
+def generate_weekly_report_view(request):
+    # Call the function to generate the weekly report
+    generate_weekly_report()  # Assuming this function is defined in utils.py
+    messages.success(request, "Weekly report generated successfully.")
+    return redirect('inventory:weekly_report')  # Use the correct namespace

@@ -32,7 +32,6 @@ class UserRegistrationForm(forms.ModelForm):
 
 class UserCreationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
-    role = forms.ModelChoiceField(queryset=Role.objects.all(), required=False)
 
     class Meta:
         model = User
@@ -43,6 +42,16 @@ class UserCreationForm(forms.ModelForm):
         user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
-            role = self.cleaned_data.get("role")
-            UserProfile.objects.create(user=user, role=role)
+            # Create UserProfile and assign a default role if needed
+            UserProfile.objects.create(user=user)
         return user
+
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['first_name', 'last_name', 'role']

@@ -55,6 +55,13 @@
                    class="form-control" required>
         </div>
 
+        <!-- Product Cost Price -->
+        <div class="mb-3">
+            <label for="cost_price" class="form-label">Cost Price:</label>
+            <input type="number" step="0.01" id="cost_price" name="cost_price" 
+                   value="{{ form.cost_price.value|default_if_none:'' }}" 
+                   class="form-control" required>
+        </div>
 
         <!-- Product Image -->
         <div class="mb-3">

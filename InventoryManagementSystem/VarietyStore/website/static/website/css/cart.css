@@ -91,7 +91,7 @@ body {
 
 /* Checkout Button */
 .checkout-button {
-    background-color: #28a745; /* Green color for checkout button */
+    background-color: maroon; /* Change this to maroon */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -101,7 +101,7 @@ body {
 }
 
 .checkout-button:hover {
-    background-color: #218838; /* Darker green on hover */
+    background-color: #5c2a2a; /* Darker maroon on hover */
 }
 
 /* Return Button */
@@ -109,7 +109,7 @@ body {
     display: inline-block;
     margin-top: 10px;
     padding: 10px 20px;
-    background-color: #007bff; /* Blue color */
+    background-color: maroon; /* Change this to maroon */
     color: white;
     text-decoration: none;
     border-radius: 4px;
@@ -117,7 +117,7 @@ body {
 }
 
 .return-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+    background-color: #5c2a2a; /* Darker maroon on hover */
 }
 
 /* Empty Cart Message */
