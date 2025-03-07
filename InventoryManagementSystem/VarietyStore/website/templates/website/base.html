@@ -6,48 +6,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}3-L Variety Store{% endblock %}</title>
-    <!-- Global CSS files -->
     <link rel="stylesheet" href="{% static 'website/css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'website/css/cart.css' %}">
-    {% block extra_head %}{% endblock %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .cart-icon {
+            position: relative;
+            display: inline-block;
+            padding: 5px;
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .alert-danger {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .alert .close-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .alert .close-btn:hover {
+            opacity: 1;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Header Section -->
+    <div class="top-banner">
+        Welcome to 3-L Variety Store - Your One-Stop Shop for Quality Products
+    </div>
+
     <header class="header">
         <div class="header-content">
-            <a href="{% url 'website:homepage' %}">
-                <img src="{% static 'website/image/new_logo1.png' %}" alt="Fresh Hub Logo" class="logo">
+            <a href="{% url 'website:home' %}">
+                <img src="{% static 'website/image/new_logo1.png' %}" alt="3-L Variety Store Logo" class="logo">
             </a>
             <input type="search" class="search-bar" placeholder="Search for products...">
             <div class="header-links">
-                <a href="#">Recipes</a>
-                <a href="#">Blog</a>
-                <a href="#">Franchise</a>
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
                 <a href="#">FAQ</a>
-                <a href="#">Stores</a>
-                <a href="#">Contact Us</a>
-                <a href="{% url 'accounts:login' %}">My Account</a>
-                <div class="cart-summary">
-                    <a href="{% url 'website:cart' %}">
-                        <img src="{% static 'website/images/cart-icon.png' %}" alt="Cart">
-                        <span id="cart-count" class="cart-counter">0</span>
-                    </a>
-                </div>
+                {% if user.is_authenticated %}
+                <a href="{% url 'website:cart' %}" class="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-badge" class="badge">0</span>
+                </a>
+                <a href="{% url 'website:customer_logout' %}">Logout</a>
+                {% else %}
+                <a href="{% url 'website:customer_login' %}">Login</a>
+                <a href="{% url 'website:customer_register' %}">Register</a>
+                {% endif %}
             </div>
         </div>
     </header>
 
-    <!-- Navigation -->
     <nav class="nav">
         <ul class="nav-list">
-            <!-- Navigation items -->
+            <li class="nav-item"><a href="{% url 'website:home' %}">Home</a></li>
+            <li class="nav-item"><a href="{% url 'website:shop' %}">Shop</a></li>
+            <li class="nav-item"><a href="#">New Arrivals</a></li>
+            <li class="nav-item"><a href="#">Best Sellers</a></li>
+            <li class="nav-item"><a href="#">Promotions</a></li>
         </ul>
     </nav>
 
-    <!-- Main Content -->
-    {% block content %}{% endblock %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+            <span class="close-btn" onclick="this.parentElement.style.display='none'">&times;</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-    <!-- Footer Section -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -69,36 +155,38 @@
                 <p>Phone: 0967 315 8034</p>
                 <div class="social-links">
                     <a href="https://www.facebook.com/3LFrozenGoodsOrmoc" target="_blank" rel="noopener noreferrer">
-                        <img src="{% static 'website/image/facebook-icon.png' %}" alt="Facebook">
+                        <i class="fab fa-facebook-f"></i>
                     </a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 3-L Variety Store. All rights reserved.</p>
+            <p>&copy; 2024 3-L Variety Store. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Cookie Notice -->
-    <div class="cookie-notice">
-        We use cookies to ensure you get the best experience while browsing our site. By continued use, you agree 
-        to our privacy statement and accept our use of such cookies.
-        <button onclick="acceptCookies()">OK</button>
-        <button onclick="viewPrivacyStatement()">Privacy Statement</button>
-    </div>
+    {% block extra_js %}{% endblock %}
 
+    {% if user.is_authenticated %}
     <script>
-        function acceptCookies() {
-            document.querySelector('.cookie-notice').style.display = 'none';
-        }
-        function viewPrivacyStatement() {
-            // Add privacy statement logic here (e.g., show a modal or redirect)
-        }
-    </script>
+    // Function to update cart badge count
+    function updateCartBadge() {
+        fetch('{% url "website:cart_count" %}')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('cart-badge');
+                if (badge) {
+                    badge.textContent = data.count;
+                }
+            })
+            .catch(error => console.error('Error fetching cart count:', error));
+    }
 
-    <!-- Global JS files -->
-    {% block extrascripts %}
-    <script src="{% static 'website/js/script.js' %}"></script>
-    {% endblock %}
+    // Update cart badge when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartBadge();
+    });
+    </script>
+    {% endif %}
 </body>
 </html>

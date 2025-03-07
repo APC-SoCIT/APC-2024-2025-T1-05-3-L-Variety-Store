@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from Inventory.models import Product  # Assuming Inventory app provides Product model
 from accounts.models import UserProfile
+from django.utils import timezone
 
 # Sale Model for completed transactions
 class Sale(models.Model):
@@ -111,16 +112,32 @@ class Payment(models.Model):
 
     
 class Cart(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sales_carts')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    def get_total_price(self):
+        return sum(item.get_total() for item in self.sales_items.all())
+
+    def get_total_items(self):
+        return sum(item.quantity for item in self.sales_items.all())
 
     def __str__(self):
         return f"Cart {self.id} for {self.user.username}"
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, related_name='sales_items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sales_cart_items')
     quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def get_total(self):
+        return self.product.product_price * self.quantity
 
     def __str__(self):
         return f"{self.quantity} x {self.product.product_name}"
+
+    class Meta:
+        unique_together = ('cart', 'product')

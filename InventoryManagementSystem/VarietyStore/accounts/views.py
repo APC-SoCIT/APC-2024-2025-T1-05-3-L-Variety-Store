@@ -14,6 +14,8 @@ from Sales.models import Sale
 from django.db.models import Count, Sum
 from accounts.decorators import admin_required
 from django.db.models import Q
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 def login_view(request):
     if request.method == 'POST':
@@ -118,16 +120,25 @@ def reset_password(request, user_id):
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def edit_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    user_profile, _ = UserProfile.objects.get_or_create(user=user)  # Ensure UserProfile exists
+    # Get the target user being edited
+    target_user = get_object_or_404(User, id=user_id)
+    user_profile, _ = UserProfile.objects.get_or_create(user=target_user)
 
     if request.method == "POST":
-        user_form = UserEditForm(request.POST, instance=user)
+        # Store current admin's session key
+        current_session_key = request.session.session_key
+        
+        user_form = UserEditForm(request.POST, instance=target_user)
         profile_form = UserProfileForm(request.POST, instance=user_profile)
 
         if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()  # Save User
-            profile_form.save()  # Save UserProfile
+            user_form.save()
+            profile_form.save()
+            
+            # Restore admin's session
+            if target_user.id != request.user.id:
+                request.session.cycle_key()
+            
             messages.success(request, "User information updated successfully.")
             return redirect('accounts:manage_roles')
         else:
@@ -135,36 +146,65 @@ def edit_user(request, user_id):
 
     roles = Role.objects.all()
     return render(request, 'accounts/edit_user.html', {
-        'user': user,
+        'edited_user': target_user,  # Changed from 'user' to 'edited_user'
         'roles': roles,
         'user_profile': user_profile,
-        'user_form': UserEditForm(instance=user),
+        'user_form': UserEditForm(instance=target_user),
         'profile_form': UserProfileForm(instance=user_profile),
     })
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
-def reset_password_email(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    form = PasswordResetForm({'email': user.email})
-    if form.is_valid():
-        form.save(
-            request=request,
-            use_https=request.is_secure(),
-            email_template_name='registration/password_reset_email.html'
-        )
-        messages.success(request, f"Password reset email sent to {user.email}.")
-    return redirect('accounts:edit_user', user_id=user.id)
+def reset_password_direct(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+    if request.method == "POST":
+        new_password = request.POST.get("new_password")
+        if not new_password:
+            messages.error(request, "Password cannot be empty.")
+            return redirect('accounts:edit_user', user_id=target_user.id)
+        
+        try:
+            # Validate password
+            validate_password(new_password, target_user)
+            
+            # Only manage session if we're not changing our own password
+            if target_user.id != request.user.id:
+                current_session_key = request.session.session_key
+            
+            # Set the new password for the target user
+            target_user.set_password(new_password)
+            target_user.save()
+            
+            # Restore admin's session only if we changed someone else's password
+            if target_user.id != request.user.id:
+                request.session.cycle_key()
+            
+            messages.success(request, f"Password for {target_user.username} has been changed successfully.")
+        except ValidationError as e:
+            messages.error(request, "\n".join(e.messages))
+        except Exception as e:
+            messages.error(request, f"An error occurred while changing the password: {str(e)}")
+    
+    return redirect('accounts:edit_user', user_id=target_user.id)
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
-def reset_password_direct(request, user_id):
+def reset_password_email(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    if request.method == "POST":
-        new_password = request.POST.get("new_password")
-        user.set_password(new_password)
-        user.save()
-        messages.success(request, "Password changed successfully.")
+    try:
+        form = PasswordResetForm({'email': user.email})
+        if form.is_valid():
+            form.save(
+                request=request,
+                use_https=request.is_secure(),
+                email_template_name='registration/password_reset_email.html'
+            )
+            messages.success(request, f"Password reset email sent to {user.email}.")
+        else:
+            messages.error(request, "Invalid email address.")
+    except Exception as e:
+        messages.error(request, f"An error occurred while sending the reset email: {str(e)}")
+    
     return redirect('accounts:edit_user', user_id=user.id)
 
 from .forms import UserCreationForm
